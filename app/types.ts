@@ -14,7 +14,6 @@ export interface User {
   supervisorName: string;
   supervisorPhoneNumber: string;
 
-
   fullName: string;
   phoneNumber: string;
   textMessage: string;
@@ -52,4 +51,16 @@ export interface User {
 
   
   username: string; // Add username field
+}
+
+
+
+
+
+// Define the Ticket interface
+export interface Ticket {
+  ticketId: string;
+  ticketTitle: string;
+  status: string;
+  // Add other relevant ticket properties here
 }

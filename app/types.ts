@@ -43,13 +43,15 @@ export interface Ticket {
   ticketId: string;
   coverImage: string;
   eventName: string;
-  date: string;
-  time: string;
+  dateTime: string;
+  doorTime: string;
   venue: string;
   location: string;
   section: string;
+  sectionNo: string;
   row: string;
   ticketFolderId: string;
+  ageRestriction: string;
   description: string;
   terms: string;
   newSTAMP: string;

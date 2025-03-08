@@ -1,16 +1,21 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Importing useRouter from next/navigation
-import { useUser } from '../UserContext'; // Import the useUser hook from context
+import { useRouter } from 'next/navigation';
+import { useUser } from '../UserContext';
 
-const AdminLogin: React.FC = () => {
+interface AdminLoginProps {
+  setLoggedInAdmin: React.Dispatch<React.SetStateAction<string | null>>;
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+}
+
+const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { setAdmin, fetchAllUsers, fetchAdminData, loading } = useUser(); // Extracting necessary methods from context
-  const router = useRouter(); // Accessing the router object
+  const { fetchAdminData, fetchAllUsers, loading } = useUser();
+  const router = useRouter();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     if (!username || !password) {
       console.error("Please enter both username and password.");
       return;
@@ -18,6 +23,7 @@ const AdminLogin: React.FC = () => {
 
     try {
       await fetchAdminData(username, password); // Call the fetchAdminData method for login
+      setLoggedInAdmin(username); // Set the logged-in admin in the parent component
       fetchAllUsers(); // Fetch users once admin logs in
       router.push('/admin'); // Redirect the user to the admin page after successful login
     } catch (error) {

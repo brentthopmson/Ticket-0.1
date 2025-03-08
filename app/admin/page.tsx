@@ -1,4 +1,3 @@
-// /admin/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -68,22 +67,14 @@ export default function AdminDashboard() {
             <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
               <button
                 onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-md flex items-center ${
-                  activeTab === 'users'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
+                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'users' ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-300'}`}
               >
                 <FontAwesomeIcon icon={faUsers} className="mr-2" />
                 <span>Users</span>
               </button>
               <button
                 onClick={() => setActiveTab('tickets')}
-                className={`px-4 py-2 rounded-md flex items-center ${
-                  activeTab === 'tickets'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
+                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'tickets' ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-300'}`}
               >
                 <FontAwesomeIcon icon={faTicketAlt} className="mr-2" />
                 <span>Tickets</span>

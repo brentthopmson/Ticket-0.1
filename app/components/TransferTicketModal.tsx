@@ -1,6 +1,6 @@
-// /components/TransferTicketModal.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Ticket } from '../types';
+import { useUser } from '../UserContext'; // Import the custom hook to access user context
 
 interface TransferTicketModalProps {
   user: User;
@@ -9,10 +9,24 @@ interface TransferTicketModalProps {
 }
 
 const TransferTicketModal: React.FC<TransferTicketModalProps> = ({ user, tickets, onClose }) => {
+  const { admin } = useUser(); // Access the admin context
   const [selectedTicketId, setSelectedTicketId] = useState<string>("");
-  const [recipientEmail, setRecipientEmail] = useState<string>("");
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    emailAddress: '',
+    seatNumbers: '' // Make sure seatNumbers is part of the formData
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,28 +35,44 @@ const TransferTicketModal: React.FC<TransferTicketModalProps> = ({ user, tickets
       setError("Please select a ticket to transfer");
       return;
     }
-    
-    if (!recipientEmail) {
-      setError("Please enter recipient's email");
+
+    if (!formData.seatNumbers) {
+      setError("Please specify seat numbers");
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
+      if (!admin) {
+        throw new Error("Admin session expired");
+      }
+
+      const selectedTicket = tickets.find(t => t.ticketId === selectedTicketId);
+      if (!selectedTicket) {
+        throw new Error("Selected ticket not found");
+      }
+
       const payload = new URLSearchParams();
+      // Use admin details from the context
       payload.append("action", "transferTicket");
+      payload.append("timestamp", new Date().toISOString());
+      payload.append("admin", sessionStorage.getItem("loggedInAdmin")!); // Assuming admin info is stored in sessionStorage
+      payload.append("senderName", admin.senderName); // Use senderName from admin context
+      payload.append("senderEmail", admin.senderEmail); // Use senderEmail from admin context
+      payload.append("fullName", formData.fullName);
+      payload.append("phoneNumber", formData.phoneNumber);
+      payload.append("emailAddress", formData.emailAddress);
       payload.append("ticketId", selectedTicketId);
-      payload.append("fromUserId", user.userId);
-      payload.append("toEmail", recipientEmail);
-      
+      payload.append("seatNumbers", formData.seatNumbers);
+
       const response = await fetch("https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: payload.toString()
       });
-      
+
       if (response.ok) {
         alert("Ticket transfer initiated successfully!");
         onClose();
@@ -58,26 +88,23 @@ const TransferTicketModal: React.FC<TransferTicketModalProps> = ({ user, tickets
     }
   };
 
-  // Filter tickets that belong to this user
-  const userTickets = tickets.filter(ticket => ticket.userId === user.userId);
+  // Filter tickets that belong to this admin
+  const adminTickets = tickets.filter(ticket => ticket.admin === sessionStorage.getItem("loggedInAdmin"));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6">
         <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Transfer Ticket</h2>
-        <p className="mb-4 text-gray-600 dark:text-gray-300">
-          Transfer a ticket from <span className="font-semibold">{user.fullName}</span> to another user.
-        </p>
         
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 dark:text-gray-300 mb-2">Select Ticket</label>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">Select Ticket*</label>
             <select
               value={selectedTicketId}
               onChange={(e) => setSelectedTicketId(e.target.value)}
@@ -85,27 +112,67 @@ const TransferTicketModal: React.FC<TransferTicketModalProps> = ({ user, tickets
               required
             >
               <option value="">-- Select a ticket --</option>
-              {userTickets.map(ticket => (
+              {adminTickets.map(ticket => (
                 <option key={ticket.ticketId} value={ticket.ticketId}>
                   {ticket.eventName} - {ticket.venue} - Section {ticket.section} {ticket.sectionNo}, Row {ticket.row}
                 </option>
               ))}
             </select>
           </div>
-          
-          <div className="mb-6">
-            <label className="block text-gray-700 dark:text-gray-300 mb-2">Recipient Email</label>
+
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">Recipient Full Name*</label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Enter recipient's full name"
+              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">Recipient Phone Number*</label>
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="Enter recipient's phone number"
+              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">Recipient Email*</label>
             <input
               type="email"
-              value={recipientEmail}
-              onChange={(e) => setRecipientEmail(e.target.value)}
+              name="emailAddress"
+              value={formData.emailAddress}
+              onChange={handleChange}
               placeholder="Enter recipient's email"
               className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
               required
             />
           </div>
-          
-          <div className="flex justify-end space-x-3">
+
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">Seat Numbers*</label>
+            <input
+              type="text"
+              name="seatNumbers"
+              value={formData.seatNumbers}
+              onChange={handleChange}
+              placeholder="Enter seat numbers"
+              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              required
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
               onClick={onClose}

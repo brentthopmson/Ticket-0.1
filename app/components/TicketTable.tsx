@@ -107,7 +107,6 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
                   </td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{ticket.section} {ticket.sectionNo}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{ticket.row}</td>
-                  <td className="border p-2 text-sm hidden lg:table-cell">{ticket.seatNumbers}</td>
                   <td className="border p-2 text-sm">
                     <div className="flex items-center justify-center space-x-3">
                       <button

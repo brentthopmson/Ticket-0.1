@@ -1,23 +1,27 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Ticket } from './types'; // Import the User and Ticket interfaces
+import { User, Ticket, Admin } from './types'; // Import the User, Ticket, and Admin interfaces
 
-// Define the URLs for both user and ticket data
+// Define the URLs for both user, ticket, and admin data
 const APP_SCRIPT_USER_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=user";
 const APP_SCRIPT_TICKET_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=ticket";
+const APP_SCRIPT_ADMIN_URL = "https://script.google.com/macros/s/AKfycbwXIfuadHykMFrMdPPLLP7y0pm4oZ8TJUnM9SMmDp9BkaVLGu9jupU-CuW8Id-Mm1ylxg/exec?sheetname=admin"; // Admin URL
 
 interface UserContextProps {
   user: User | null;
   users: User[];
   ticket: Ticket | null;
   tickets: Ticket[];
+  admin: Admin | null; // Admin state
   loading: boolean;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   setUsers: React.Dispatch<React.SetStateAction<User[]>>;
   setTicket: React.Dispatch<React.SetStateAction<Ticket | null>>;
   setTickets: React.Dispatch<React.SetStateAction<Ticket[]>>;
+  setAdmin: React.Dispatch<React.SetStateAction<Admin | null>>; // Added setAdmin function
   fetchAllUsers: () => Promise<void>;
   fetchAllTickets: () => Promise<void>;
+  fetchAdminData: (username: string, password: string) => Promise<void>; // Function to fetch admin data
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -25,13 +29,16 @@ const UserContext = createContext<UserContextProps>({
   users: [],
   ticket: null,
   tickets: [],
+  admin: null, // Default to null
   loading: true,
   setUser: () => {},
   setUsers: () => {},
   setTicket: () => {},
   setTickets: () => {},
+  setAdmin: () => {}, // Default function
   fetchAllUsers: async () => {},
-  fetchAllTickets: async () => {}
+  fetchAllTickets: async () => {},
+  fetchAdminData: async () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -39,9 +46,29 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [admin, setAdmin] = useState<Admin | null>(null); // Admin state
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Fetch admin data by username and password
+  const fetchAdminData = async (username: string, password: string) => {
+    try {
+      const response = await fetch(APP_SCRIPT_ADMIN_URL);
+      const data: Admin[] = await response.json();
+      const adminData = data.find((admin) => admin.username === username && admin.password === password);
+      if (adminData) {
+        setAdmin(adminData); // Set the admin data in context
+        sessionStorage.setItem("loggedInAdmin", username); // Store in sessionStorage
+      } else {
+        alert("Invalid admin credentials!");
+      }
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch user data by userId
   const fetchUserData = async (id: string) => {
@@ -175,7 +202,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       fetchAllUsers(); // Refresh all users data periodically
       fetchAllTickets(); // Refresh all tickets data periodically
-    }, 2000); // Poll every 2 seconds (adjust as needed)
+    }, 10000); // Poll every 2 seconds (adjust as needed)
 
     return () => clearInterval(interval);
   }, [searchParams, router, user]); // Added 'user' dependency here
@@ -187,13 +214,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         users,
         ticket,
         tickets,
+        admin, // Provide admin data in context
         loading,
         setUser,
         setUsers,
         setTicket,
         setTickets,
+        setAdmin, // Provide setAdmin function
         fetchAllUsers,
         fetchAllTickets,
+        fetchAdminData, // Provide fetchAdminData function
       }}
     >
       {children}

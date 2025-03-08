@@ -59,3 +59,14 @@ export interface Ticket {
   eventStatus: string;
   ticketStatus: string;
 }
+
+
+export interface Admin {
+  sn: string;
+  adminId: string;
+  username: string;
+  password: string;
+  senderName: string;
+  senderEmail: string;
+  telegramId: string;
+}

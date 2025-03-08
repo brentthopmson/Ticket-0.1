@@ -1,43 +1,33 @@
 export interface User {
+  sn: string;
   userId: string;
   admin: string;
-  organization: string;
-  orgAddress: string;
-  orgState: string;
-  logo: string;
-  position: string;
-  roleList: string;
-  roleDescription: string;
-  helpCenterPhone: string;
-  helpCenterEmailCover: string;
-  helpCenterEmailAddress: string;
-  supervisorName: string;
-  supervisorPhoneNumber: string;
-
+  senderName: string;
+  senderEmail: string;
+  timestamp: string;
   fullName: string;
   phoneNumber: string;
-  textMessage: string;
-  interviewLink: string;
   emailAddress: string;
-  timeIn: string;
-  interviewResponse: string;
-  timeOut: string;
-  userFolderId: string;
-  frontId: string;
-  backId: string;
-  selfie: string;
-  resume: string;
-  adminApprovalTime: string;
-  signedLetter: string;
-  paymentMethod: string;
-  bankName: string;
-  accountName: string;
-  accountNumber: string;
-  routingNumber: string;
-  address: string;
-  payCount: string;
-  totalAmount: string;
-  totalPayout: string;
+  ticketId: string;
+  seatNumbers: string;
+  coverImage: string;
+  eventName: string;
+  dateTime: string;
+  doorTime: string;
+  venue: string;
+  location: string;
+  section: string;
+  sectionNo: string;
+  row: string;
+  ageRestriction: string;
+  description: string;
+  terms: string;
+  eventStatus: string;
+  ticketStatus: string;
+  link: string;
+  approvalSTAMP: string;
+  completedSTAMP: string;
+  returnedSTAMP: string;
   route: string;
   titleStatus: string;
   messageStatus: string;
@@ -45,22 +35,25 @@ export interface User {
   systemStatus: string;
   percentageStatus: string;
   adminStatus: string;
-  adminSMSStatus: string;
-  adminApprovalTimeX7: string;
-  verificationCode: string;
-
-  
-  username: string; // Add username field
 }
 
-
-
-
-
-// Define the Ticket interface
 export interface Ticket {
+  sn: string;
+  token: string;
   ticketId: string;
-  ticketTitle: string;
-  status: string;
-  // Add other relevant ticket properties here
+  coverImage: string;
+  eventName: string;
+  date: string;
+  time: string;
+  venue: string;
+  location: string;
+  section: string;
+  row: string;
+  ticketFolderId: string;
+  description: string;
+  terms: string;
+  newSTAMP: string;
+  deletedSTAMP: string;
+  eventStatus: string;
+  ticketStatus: string;
 }

@@ -1,11 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Ticket } from './types'; // Import the User interface
+import { User, Ticket } from './types'; // Import the User and Ticket interfaces
 
 // Define the URLs for both user and ticket data
-const APP_SCRIPT_USER_URL = "https://script.google.com/macros/s/AKfycbwXIfuadHykMFrMdPPLLP7y0pm4oZ8TJUnM9SMmDp9BkaVLGu9jupU-CuW8Id-Mm1ylxg/exec?sheetname=user";
-const APP_SCRIPT_TICKET_URL = "https://script.google.com/macros/s/AKfycbwXIfuadHykMFrMdPPLLP7y0pm4oZ8TJUnM9SMmDp9BkaVLGu9jupU-CuW8Id-Mm1ylxg/exec?sheetname=ticket";
-
+const APP_SCRIPT_USER_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=user";
+const APP_SCRIPT_TICKET_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=ticket";
 
 interface UserContextProps {
   user: User | null;
@@ -109,7 +108,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // useEffect hook to handle fetching based on URL parameters and cache
   useEffect(() => {
     const idFromUrl = searchParams.get('id');
-    const ticketIdFromUrl = searchParams.get('ticketId');  // Fetch ticketId from URL if available
     const cachedId = localStorage.getItem('userId');
     const cachedUserData = localStorage.getItem('userData');
     const cachedAllUsersData = localStorage.getItem('allUsersData');
@@ -165,8 +163,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
 
-    if (ticketIdFromUrl) {
-      fetchTicketData(ticketIdFromUrl);  // Fetch the specific ticket based on URL parameter
+    // Fetch ticket data based on the user's ticketId
+    if (user && user.ticketId) {
+      fetchTicketData(user.ticketId); // Fetch ticket based on user's ticketId
     }
 
     const interval = setInterval(() => {
@@ -179,7 +178,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }, 2000); // Poll every 2 seconds (adjust as needed)
 
     return () => clearInterval(interval);
-  }, [searchParams, router]);
+  }, [searchParams, router, user]); // Added 'user' dependency here
 
   return (
     <UserContext.Provider

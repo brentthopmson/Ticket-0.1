@@ -1,44 +1,27 @@
-import { useState, useRef } from 'react';
+// /components/UserTable.tsx
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderOpen, faPaperPlane, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
-import PaymentModal from './PaymentModal';
-import DetailsModal from './DetailsModal';
-import { User } from '../types';
+import { faFolderOpen, faPaperPlane, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
+import TransferTicketModal from './TransferTicketModal';
+import { User, Ticket } from '../types';
 
 interface UserTableProps {
   users: User[];
+  tickets: Ticket[];
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users }) => {
+const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [attachment, setAttachment] = useState<File | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [showTransferModal, setShowTransferModal] = useState(false);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleMoneyIconClick = (user: User) => {
+  const handleTransferTicket = (user: User) => {
     setSelectedUser(user);
-    if (user.systemStatus === "WAITING CHECK") {
-      setShowPaymentModal(true);
-    } else if (user.systemStatus === "ACTIVE") {
-      setShowDetailsModal(true);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.type !== "application/pdf") {
-        alert("Only PDF files are allowed.");
-        return;
-      }
-      setAttachment(file);
-    }
+    setShowTransferModal(true);
   };
 
   const filteredUsers = users.filter(user => {
@@ -49,77 +32,102 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
   return (
     <>
       <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
-          />
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Users Management</h2>
+          <div className="w-1/3">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+            />
+          </div>
         </div>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="border p-2 text-sm hidden lg:table-cell">Full Name</th>
-              <th className="border p-2 text-sm">Phone Number</th>
-              <th className="border p-2 text-sm hidden lg:table-cell">Email Address</th>
-              <th className="border p-2 text-sm hidden lg:table-cell">Payment Method</th>
-              <th className="border p-2 text-sm hidden lg:table-cell">Bank Name</th>
-              <th className="border p-2 text-sm hidden lg:table-cell">System Status</th>
-              <th className="border p-2 text-sm">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user.userId}>
-                <td className="border p-2 text-sm hidden lg:table-cell">{user.fullName}</td>
-                <td className="border p-2 text-sm">{user.phoneNumber}</td>
-                <td className="border p-2 text-sm hidden lg:table-cell">{user.emailAddress}</td>
-                <td className="border p-2 text-sm hidden lg:table-cell">{user.paymentMethod}</td>
-                <td className="border p-2 text-sm hidden lg:table-cell">{user.bankName}</td>
-                <td className="border p-2 text-sm hidden lg:table-cell">{user.systemStatus}</td>
-                <td className="border p-2 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <a href={user.adminSMSStatus} target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faPaperPlane} className="cursor-pointer" />
-                    </a>
-                    {user.userFolderId && (
-                      <a href={`https://drive.google.com/drive/folders/${user.userFolderId}`} target="_blank" rel="noopener noreferrer">
-                        <FontAwesomeIcon icon={faFolderOpen} />
-                      </a>
-                    )}
-                    {(user.systemStatus === "WAITING CHECK" || user.systemStatus === "ACTIVE") && (
-                      <FontAwesomeIcon
-                        icon={faMoneyBillWave}
-                        className="cursor-pointer"
-                        onClick={() => handleMoneyIconClick(user)}
-                      />
-                    )}
-                  </div>
-                </td>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="border p-2 text-sm text-left">Full Name</th>
+                <th className="border p-2 text-sm text-left">Phone Number</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Email Address</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Payment Method</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Bank Name</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">System Status</th>
+                <th className="border p-2 text-sm text-center">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredUsers.map(user => (
+                <tr key={user.userId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="border p-2 text-sm">{user.fullName}</td>
+                  <td className="border p-2 text-sm">{user.phoneNumber}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">{user.emailAddress}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">{user.paymentMethod}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">{user.bankName}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      user.systemStatus === "ACTIVE" 
+                        ? "bg-green-100 text-green-800" 
+                        : user.systemStatus === "WAITING CHECK" 
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}>
+                      {user.systemStatus}
+                    </span>
+                  </td>
+                  <td className="border p-2 text-sm">
+                    <div className="flex items-center justify-center space-x-3">
+                      <a 
+                        href={user.adminSMSStatus} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Send SMS"
+                      >
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                      </a>
+                      {user.userFolderId && (
+                        <a 
+                          href={`https://drive.google.com/drive/folders/${user.userFolderId}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-yellow-600 hover:text-yellow-800"
+                          title="Open Folder"
+                        >
+                          <FontAwesomeIcon icon={faFolderOpen} />
+                        </a>
+                      )}
+                      <button
+                        className="text-purple-600 hover:text-purple-800"
+                        title="Transfer Ticket"
+                        onClick={() => handleTransferTicket(user)}
+                      >
+                        <FontAwesomeIcon icon={faTicketAlt} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {filteredUsers.length === 0 && (
+          <div className="text-center py-4 text-gray-500">
+            No users found matching your search criteria.
+          </div>
+        )}
       </section>
 
-      {/* Hidden form for navigation */}
-      <form ref={formRef} method="GET" style={{ display: 'none' }}></form>
-
-      {/* Payment Modal */}
-      {showPaymentModal && selectedUser && (
-        <PaymentModal
-          selectedUser={selectedUser}
-          setShowPaymentModal={setShowPaymentModal}
-          attachment={attachment}
-          handleFileChange={handleFileChange}
+      {/* Transfer Ticket Modal */}
+      {showTransferModal && selectedUser && (
+        <TransferTicketModal 
+          user={selectedUser} 
+          tickets={tickets}
+          onClose={() => setShowTransferModal(false)} 
         />
-      )}
-
-      {/* Details Modal */}
-      {showDetailsModal && selectedUser && (
-        <DetailsModal selectedUser={selectedUser} setShowDetailsModal={setShowDetailsModal} />
       )}
     </>
   );

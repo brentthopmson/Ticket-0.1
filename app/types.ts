@@ -39,7 +39,7 @@ export interface User {
 
 export interface Ticket {
   sn: string;
-  token: string;
+  admin: string;
   ticketId: string;
   coverImage: string;
   eventName: string;

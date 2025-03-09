@@ -51,9 +51,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
         payload.append(key, value);
       });
       
-      // Generate a timestamp for ticketId if needed
-      payload.append("ticketId", `TIX-${Date.now()}`);
-      
       const response = await fetch("https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },

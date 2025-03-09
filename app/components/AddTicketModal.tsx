@@ -24,7 +24,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
     coverImage: '',
     description: '',
     terms: '',
-    eventStatus: 'Confirmed'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -90,12 +89,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
           </button>
         </div>
         
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-        
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -160,14 +153,19 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             
             <div>
               <label className="block text-gray-700 dark:text-gray-300 mb-1">Section*</label>
-              <input
-                type="text"
+              <select
                 name="section"
                 value={formData.section}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
                 required
-              />
+              >
+                <option value="">Select a section</option>
+                <option value="VIP Packages">VIP Packages</option>
+                <option value="Floor Seats">Floor Seats</option>
+                <option value="Lower Bowl">Lower Bowl</option>
+                <option value="Upper Bowl">Upper Bowl</option>
+              </select>
             </div>
             
             <div>
@@ -194,19 +192,6 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Seat Numbers*</label>
-              <input
-                type="text"
-                name="seatNumbers"
-                value={formData.seatNumbers}
-                onChange={handleChange}
-                placeholder="e.g. 12, 13, 14"
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
-                required
-              />
-            </div>
-            
-            <div>
               <label className="block text-gray-700 dark:text-gray-300 mb-1">Age Restriction</label>
               <select
                 name="ageRestriction"
@@ -219,22 +204,8 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 <option value="21+">21+</option>
               </select>
             </div>
-            
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Event Status</label>
-              <select
-                name="eventStatus"
-                value={formData.eventStatus}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
-              >
-                <option value="Confirmed">Confirmed</option>
-                <option value="Postponed">Postponed</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Cover Image URL</label>
             <input
@@ -246,7 +217,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
               className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
             />
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Description</label>
             <textarea
@@ -257,7 +228,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
               className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
             ></textarea>
           </div>
-          
+
           <div className="mb-6">
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Terms & Conditions</label>
             <textarea
@@ -269,6 +240,13 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             ></textarea>
           </div>
           
+          {/* Error Message is now just before the buttons */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+
           <div className="flex justify-end space-x-3">
             <button
               type="button"

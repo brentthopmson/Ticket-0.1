@@ -202,7 +202,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       fetchAllUsers(); // Refresh all users data periodically
       fetchAllTickets(); // Refresh all tickets data periodically
-    }, 10000); // Poll every 2 seconds (adjust as needed)
+    }, 30000); // Poll every 2 seconds (adjust as needed)
 
     return () => clearInterval(interval);
   }, [searchParams, router, user]); // Added 'user' dependency here

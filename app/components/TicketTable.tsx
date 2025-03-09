@@ -9,13 +9,15 @@ import UpdateTicketModal from './UpdateTicketModal';
 interface TicketTableProps {
   tickets: Ticket[];
   users: User[];
+  onTicketsChange?: () => void; // Callback to refresh tickets after changes
 }
 
-const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
+const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChange }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -28,6 +30,8 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
 
   const handleDeleteTicket = async (ticketId: string) => {
     if (!confirm("Are you sure you want to delete this ticket?")) return;
+    
+    setIsDeleting(ticketId);
     
     try {
       const currentDate = new Date().toISOString();
@@ -44,13 +48,32 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
       
       if (response.ok) {
         alert("Ticket deleted successfully!");
-        // You might want to refresh the tickets list here
+        // Refresh the tickets list
+        if (onTicketsChange) {
+          onTicketsChange();
+        }
       } else {
         alert("Failed to delete ticket. Please try again.");
       }
     } catch (error) {
       console.error("Error deleting ticket:", error);
       alert("An error occurred while deleting the ticket.");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleAddTicketClose = () => {
+    setShowAddModal(false);
+    if (onTicketsChange) {
+      onTicketsChange();
+    }
+  };
+
+  const handleUpdateTicketClose = () => {
+    setShowUpdateModal(false);
+    if (onTicketsChange) {
+      onTicketsChange();
     }
   };
 
@@ -62,10 +85,10 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
   return (
     <>
       <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Tickets Management</h2>
-          <div className="flex items-center space-x-4">
-            <div className="w-64">
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
+            <div className="w-full sm:w-64">
               <input
                 type="text"
                 placeholder="Search tickets..."
@@ -76,7 +99,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Add Ticket
@@ -93,7 +116,6 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
                 <th className="border p-2 text-sm text-left hidden md:table-cell">Date & Time</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Section</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Row</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">Seats</th>
                 <th className="border p-2 text-sm text-center">Actions</th>
               </tr>
             </thead>
@@ -113,6 +135,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
                         onClick={() => handleUpdateTicket(ticket)}
                         className="text-blue-600 hover:text-blue-800"
                         title="Update Ticket"
+                        disabled={isDeleting === ticket.ticketId}
                       >
                         <FontAwesomeIcon icon={faEdit} />
                       </button>
@@ -120,8 +143,13 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
                         onClick={() => handleDeleteTicket(ticket.ticketId)}
                         className="text-red-600 hover:text-red-800"
                         title="Delete Ticket"
+                        disabled={isDeleting === ticket.ticketId}
                       >
-                        <FontAwesomeIcon icon={faTrash} />
+                        {isDeleting === ticket.ticketId ? (
+                          <span className="inline-block w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <FontAwesomeIcon icon={faTrash} />
+                        )}
                       </button>
                     </div>
                   </td>
@@ -140,14 +168,14 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
 
       {/* Add Ticket Modal */}
       {showAddModal && (
-        <AddTicketModal onClose={() => setShowAddModal(false)} />
+        <AddTicketModal onClose={handleAddTicketClose} />
       )}
 
       {/* Update Ticket Modal */}
       {showUpdateModal && selectedTicket && (
         <UpdateTicketModal 
           ticket={selectedTicket} 
-          onClose={() => setShowUpdateModal(false)} 
+          onClose={handleUpdateTicketClose} 
         />
       )}
     </>

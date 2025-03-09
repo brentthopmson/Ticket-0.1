@@ -25,6 +25,7 @@ export interface User {
   eventStatus: string;
   ticketStatus: string;
   link: string;
+  ticketFolderId: string;
   approvalSTAMP: string;
   completedSTAMP: string;
   returnedSTAMP: string;
@@ -35,6 +36,7 @@ export interface User {
   systemStatus: string;
   percentageStatus: string;
   adminStatus: string;
+  adminSMSStatus: string;
 }
 
 export interface Ticket {

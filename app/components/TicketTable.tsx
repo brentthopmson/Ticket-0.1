@@ -55,7 +55,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users }) => {
   };
 
   const filteredTickets = tickets.filter(ticket => {
-    const searchString = `${ticket.eventName} ${ticket.venue} ${ticket.section} ${ticket.row} ${ticket.seatNumbers}`.toLowerCase();
+    const searchString = `${ticket.eventName} ${ticket.venue} ${ticket.section} ${ticket.row}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
 

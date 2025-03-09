@@ -178,18 +178,6 @@ const UpdateTicketModal: React.FC<UpdateTicketModalProps> = ({ ticket, onClose }
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Seat Numbers*</label>
-              <input
-                type="text"
-                name="seatNumbers"
-                value={formData.seatNumbers || ''}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
-                required
-              />
-            </div>
-            
-            <div>
               <label className="block text-gray-700 dark:text-gray-300 mb-1">Age Restriction</label>
               <select
                 name="ageRestriction"
@@ -203,19 +191,6 @@ const UpdateTicketModal: React.FC<UpdateTicketModalProps> = ({ ticket, onClose }
               </select>
             </div>
             
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Event Status</label>
-              <select
-                name="eventStatus"
-                value={formData.eventStatus || 'Confirmed'}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
-              >
-                <option value="Confirmed">Confirmed</option>
-                <option value="Postponed">Postponed</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
           </div>
           
           <div>

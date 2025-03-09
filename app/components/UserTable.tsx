@@ -1,8 +1,7 @@
-// /components/UserTable.tsx
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderOpen, faPaperPlane, faTicketAlt } from '@fortawesome/free-solid-svg-icons';
-import TransferTicketModal from './TransferTicketModal';
+import { faFolderOpen, faPaperPlane, faTicketAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import AddUserModal from './AddUserModal'; // Add new modal component for adding users
 import { User, Ticket } from '../types';
 
 interface UserTableProps {
@@ -11,21 +10,26 @@ interface UserTableProps {
 }
 
 const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserFormData, setNewUserFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    emailAddress: '',
+    seatNumbers: '', // You can add seat numbers if necessary
+  });
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleTransferTicket = (user: User) => {
-    setSelectedUser(user);
-    setShowTransferModal(true);
+  // This handles adding a user (without submitting in the table, modal will take care of submission)
+  const handleAddUser = () => {
+    setShowAddUserModal(true); // Show the modal for adding a user
   };
 
   const filteredUsers = users.filter(user => {
-    const searchString = `${user.fullName} ${user.phoneNumber} ${user.emailAddress} ${user.userFolderId} ${user.paymentMethod} ${user.bankName} ${user.adminStatus}`.toLowerCase();
+    const searchString = `${user.fullName} ${user.phoneNumber} ${user.emailAddress} ${user.ticketFolderId} ${user.eventName} ${user.section} ${user.adminStatus}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
 
@@ -34,17 +38,26 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
       <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Users Management</h2>
-          <div className="w-1/3">
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
-            />
+          <div className="flex items-center space-x-4">
+            <div className="w-1/3">
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              />
+            </div>
+            <button
+              onClick={handleAddUser}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+            >
+              <FontAwesomeIcon icon={faPlus} className="mr-2" />
+              Add User
+            </button>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -52,9 +65,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                 <th className="border p-2 text-sm text-left">Full Name</th>
                 <th className="border p-2 text-sm text-left">Phone Number</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Email Address</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">Payment Method</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">Bank Name</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">System Status</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Event</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Section</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Status</th>
                 <th className="border p-2 text-sm text-center">Actions</th>
               </tr>
             </thead>
@@ -64,34 +77,36 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                   <td className="border p-2 text-sm">{user.fullName}</td>
                   <td className="border p-2 text-sm">{user.phoneNumber}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.emailAddress}</td>
-                  <td className="border p-2 text-sm hidden lg:table-cell">{user.paymentMethod}</td>
-                  <td className="border p-2 text-sm hidden lg:table-cell">{user.bankName}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">{user.eventName}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">{user.section}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      user.systemStatus === "ACTIVE" 
-                        ? "bg-green-100 text-green-800" 
-                        : user.systemStatus === "WAITING CHECK" 
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        user.systemStatus === 'ACTIVE'
+                          ? 'bg-green-100 text-green-800'
+                          : user.systemStatus === 'WAITING CHECK'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {user.systemStatus}
                     </span>
                   </td>
                   <td className="border p-2 text-sm">
                     <div className="flex items-center justify-center space-x-3">
-                      <a 
-                        href={user.adminSMSStatus} 
-                        target="_blank" 
+                      <a
+                        href={user.adminSMSStatus}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800"
                         title="Send SMS"
                       >
                         <FontAwesomeIcon icon={faPaperPlane} />
                       </a>
-                      {user.userFolderId && (
-                        <a 
-                          href={`https://drive.google.com/drive/folders/${user.userFolderId}`} 
-                          target="_blank" 
+                      {user.ticketFolderId && (
+                        <a
+                          href={`https://drive.google.com/drive/folders/${user.ticketFolderId}`}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-yellow-600 hover:text-yellow-800"
                           title="Open Folder"
@@ -102,7 +117,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                       <button
                         className="text-purple-600 hover:text-purple-800"
                         title="Transfer Ticket"
-                        onClick={() => handleTransferTicket(user)}
                       >
                         <FontAwesomeIcon icon={faTicketAlt} />
                       </button>
@@ -113,7 +127,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
             </tbody>
           </table>
         </div>
-        
+
         {filteredUsers.length === 0 && (
           <div className="text-center py-4 text-gray-500">
             No users found matching your search criteria.
@@ -121,12 +135,14 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
         )}
       </section>
 
-      {/* Transfer Ticket Modal */}
-      {showTransferModal && selectedUser && (
-        <TransferTicketModal 
-          user={selectedUser} 
+      {/* Add User Modal */}
+      {showAddUserModal && (
+        <AddUserModal
           tickets={tickets}
-          onClose={() => setShowTransferModal(false)} 
+          formData={newUserFormData}
+          setFormData={setNewUserFormData}
+          onAddUser={handleAddUser}
+          onClose={() => setShowAddUserModal(false)}
         />
       )}
     </>

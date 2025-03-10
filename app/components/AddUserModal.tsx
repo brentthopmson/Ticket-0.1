@@ -54,7 +54,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       payload.append("phoneNumber", formData.phoneNumber);
       payload.append("emailAddress", formData.emailAddress);
       payload.append("seatNumbers", formData.seatNumbers);
-      payload.append("ticketId", selectedTicketId);
+      payload.append("ticketId", selectedTicketId);  // Make sure we're sending the ticketId here
   
       const response = await fetch(APP_SCRIPT_POST_URL, {
         method: 'POST',
@@ -87,7 +87,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-xl font-semibold">Add User</h2>
+        <h2 className="text-xl font-semibold">Transfer Ticket</h2>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <label className="block text-sm">Full Name</label>
@@ -124,14 +124,14 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="space-y-2">
             <label className="block text-sm">Select Ticket</label>
             <select
-              value={selectedTicketId}
-              onChange={(e) => setSelectedTicketId(e.target.value)}
+              value={selectedTicketId} // Ensure the ticketId is being correctly tracked
+              onChange={(e) => setSelectedTicketId(e.target.value)} // This should update with the ticketId
               className="w-full p-2 border border-gray-300 rounded"
             >
               <option value="">--Select a Ticket--</option>
               {tickets.map(ticket => (
-                <option key={ticket.ticketId} value={ticket.ticketId}>
-                  {ticket.eventName}
+                <option key={ticket.ticketId} value={ticket.ticketId}> 
+                  {ticket.eventName} {/* The eventName is just for display */}
                 </option>
               ))}
             </select>

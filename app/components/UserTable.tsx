@@ -36,10 +36,10 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
   return (
     <>
       <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Users Management</h2>
-          <div className="flex items-center space-x-4">
-            <div className="w-1/3">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Users</h2>
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
+            <div className="w-full sm:w-64">
               <input
                 type="text"
                 placeholder="Search users..."
@@ -50,7 +50,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
             </div>
             <button
               onClick={handleAddUser}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Add User
@@ -114,12 +114,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                           <FontAwesomeIcon icon={faFolderOpen} />
                         </a>
                       )}
-                      <button
-                        className="text-purple-600 hover:text-purple-800"
-                        title="Transfer Ticket"
-                      >
-                        <FontAwesomeIcon icon={faTicketAlt} />
-                      </button>
                     </div>
                   </td>
                 </tr>

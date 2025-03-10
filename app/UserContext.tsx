@@ -51,11 +51,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Retry mechanism with exponential backoff
+  const fetchWithRetry = async (url: string, retries = 3, delay = 1000) => {
+    let attempt = 0;
+    while (attempt < retries) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Network response was not ok");
+        return await response.json();
+      } catch (error) {
+        attempt++;
+        if (attempt < retries) {
+          console.log(`Retrying... attempt ${attempt}`);
+          await new Promise(resolve => setTimeout(resolve, delay * attempt)); // Exponential backoff
+        } else {
+          console.error("Failed to fetch after multiple attempts:", error);
+          throw error;
+        }
+      }
+    }
+  };
+
   // Fetch admin data by username and password
   const fetchAdminData = async (username: string, password: string) => {
     try {
-      const response = await fetch(APP_SCRIPT_ADMIN_URL);
-      const data: Admin[] = await response.json();
+      const data: Admin[] = await fetchWithRetry(APP_SCRIPT_ADMIN_URL);
       const adminData = data.find((admin) => admin.username === username && admin.password === password);
       if (adminData) {
         setAdmin(adminData); // Set the admin data in context
@@ -73,8 +93,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // Fetch user data by userId
   const fetchUserData = async (id: string) => {
     try {
-      const response = await fetch(APP_SCRIPT_USER_URL);
-      const data: User[] = await response.json();
+      const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
       const userData = data.find((row: User) => row.userId === id);
       if (userData) {
         setUser(userData);
@@ -90,8 +109,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // Fetch all users
   const fetchAllUsers = async () => {
     try {
-      const response = await fetch(APP_SCRIPT_USER_URL);
-      const data: User[] = await response.json();
+      const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
       setUsers(data);
       localStorage.setItem('allUsersData', JSON.stringify(data)); // Cache all users data
     } catch (error) {
@@ -104,8 +122,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // Fetch ticket data by ticketId
   const fetchTicketData = async (ticketId: string) => {
     try {
-      const response = await fetch(APP_SCRIPT_TICKET_URL);
-      const data: Ticket[] = await response.json();
+      const data: Ticket[] = await fetchWithRetry(APP_SCRIPT_TICKET_URL);
       const ticketData = data.find((row: Ticket) => row.ticketId === ticketId);
       if (ticketData) {
         setTicket(ticketData);
@@ -121,14 +138,36 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // Fetch all tickets
   const fetchAllTickets = async () => {
     try {
-      const response = await fetch(APP_SCRIPT_TICKET_URL);
-      const data: Ticket[] = await response.json();
+      const data: Ticket[] = await fetchWithRetry(APP_SCRIPT_TICKET_URL);
       setTickets(data);
       localStorage.setItem('allTicketsData', JSON.stringify(data)); // Cache all tickets data
     } catch (error) {
       console.error('Error fetching all tickets:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Sequential data fetching with a delay in between
+  const fetchDataSequentially = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch data in sequence with a delay (e.g., 2 minutes between each fetch)
+      await fetchUserData('user-id-here'); // Fetch user data first
+      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000)); // Wait for 2 minutes
+
+      await fetchAllUsers(); // Fetch all users
+      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000)); // Wait for 2 minutes
+
+      await fetchAllTickets(); // Fetch all tickets
+      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000)); // Wait for 2 minutes
+
+      await fetchAdminData('admin-username', 'admin-password'); // Fetch admin data
+
+      setLoading(false); // Done fetching
+    } catch (error) {
+      console.error("Error fetching data sequentially:", error);
     }
   };
 
@@ -195,6 +234,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       fetchTicketData(user.ticketId); // Fetch ticket based on user's ticketId
     }
 
+    // Start fetching all data sequentially
+    fetchDataSequentially();
+
     const interval = setInterval(() => {
       const id = searchParams.get('id') || localStorage.getItem('userId');
       if (id) {
@@ -202,7 +244,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       fetchAllUsers(); // Refresh all users data periodically
       fetchAllTickets(); // Refresh all tickets data periodically
-    }, 100000); 
+    }, 300000);  // Set a larger interval (e.g., 5 minutes)
 
     return () => clearInterval(interval);
   }, [searchParams, router, user]); // Added 'user' dependency here

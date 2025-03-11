@@ -21,7 +21,7 @@ interface UserContextProps {
   setAdmin: React.Dispatch<React.SetStateAction<Admin | null>>; // Added setAdmin function
   fetchAllUsers: () => Promise<void>;
   fetchAllTickets: () => Promise<void>;
-  fetchAdminData: (username: string, password: string) => Promise<void>; // Function to fetch admin data
+  fetchAdminData: (username: string, password: string) => Promise<boolean>; // ✅ FIXED
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -38,7 +38,7 @@ const UserContext = createContext<UserContextProps>({
   setAdmin: () => {}, // Default function
   fetchAllUsers: async () => {},
   fetchAllTickets: async () => {},
-  fetchAdminData: async () => {},
+  fetchAdminData: async () => false, // ✅ FIXED
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -73,23 +73,30 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Fetch admin data by username and password
-  const fetchAdminData = async (username: string, password: string) => {
+  const fetchAdminData = async (username: string, password: string): Promise<boolean> => {
     try {
       const data: Admin[] = await fetchWithRetry(APP_SCRIPT_ADMIN_URL);
       const adminData = data.find((admin) => admin.username === username && admin.password === password);
       if (adminData) {
-        setAdmin(adminData); // Set the admin data in context
-        sessionStorage.setItem("loggedInAdmin", username); // Store username
-        sessionStorage.setItem("adminData", JSON.stringify(adminData)); // Store full admin data
+        setAdmin(adminData);
+        sessionStorage.setItem("loggedInAdmin", username);
+        sessionStorage.setItem("adminData", JSON.stringify(adminData));
+        return true; // ✅ Login success
       } else {
         alert("Invalid admin credentials!");
+        sessionStorage.removeItem("loggedInAdmin"); // ✅ Clear any incorrect data
+        sessionStorage.removeItem("adminData");
+        setAdmin(null); // ✅ Clear admin state if login fails
+        return false; // ❌ Login failed
       }
     } catch (error) {
       console.error("Error fetching admin data:", error);
+      return false;
     } finally {
       setLoading(false);
     }
   };
+  
 
 
   // Fetch user data by userId

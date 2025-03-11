@@ -18,27 +18,36 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     if (!username || !password) {
       console.error("Please enter both username and password.");
       return;
     }
-
+  
     try {
-      await fetchAdminData(username, password);
-      // Debug the admin data structure
+      const success = await fetchAdminData(username, password); // ✅ capture return value
+  
+      if (!success) {
+        console.error("Login failed. Invalid credentials.");
+        return; // ❌ Don't continue if login failed
+      }
+  
+      // ✅ Proceed if login succeeded
       const adminData = sessionStorage.getItem("adminData");
       if (adminData) {
         console.log("Admin data structure:", JSON.parse(adminData));
-      }  
+      }
+  
       fetchAllUsers();
       setLoggedInAdmin(username);
       sessionStorage.setItem("loggedInAdmin", username);
+  
       router.push('/admin');
     } catch (error) {
       console.error('Error logging in:', error);
     }
   };
+  
 
   return (
     <div className="p-6 lg:p-12 bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center">

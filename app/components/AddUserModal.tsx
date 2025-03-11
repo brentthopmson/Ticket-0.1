@@ -1,13 +1,26 @@
 import { useState } from 'react';
-import { User, Ticket } from '../types';
+import { useUser } from '../UserContext'; // This is the correct way to access the context
+import { Ticket } from '../types';
 
-// App Script URL for ticket approval
-const APP_SCRIPT_POST_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
+const APP_SCRIPT_POST_URL =
+  'https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec';
 
 interface AddUserModalProps {
   tickets: Ticket[];
-  formData: { fullName: string; phoneNumber: string; emailAddress: string; seatNumbers: string };
-  setFormData: React.Dispatch<React.SetStateAction<{ fullName: string; phoneNumber: string; emailAddress: string; seatNumbers: string }>>;
+  formData: {
+    fullName: string;
+    phoneNumber: string;
+    emailAddress: string;
+    seatNumbers: string;
+  };
+  setFormData: React.Dispatch<
+    React.SetStateAction<{
+      fullName: string;
+      phoneNumber: string;
+      emailAddress: string;
+      seatNumbers: string;
+    }>
+  >;
   onAddUser: () => void;
   onClose: () => void;
 }
@@ -19,7 +32,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onAddUser,
   onClose
 }) => {
-  const [selectedTicketId, setSelectedTicketId] = useState<string>(''); // Initialize selectedTicketId here
+  const { admin } = useUser(); // Use the useUser hook to get admin data
+  const [selectedTicketId, setSelectedTicketId] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,21 +58,45 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       return;
     }
   
+    // Debug admin object
+    console.log("Admin data in AddUserModal:", admin);
+  
+    if (!admin) {
+      setError('Admin data is missing. Please log in again.');
+      return;
+    }
+  
     setLoading(true);
+    setError(null);
   
     try {
-      // POST request to save new user
+      const timestamp = new Date().toISOString();
+  
+      // Create payload with all the fields
       const payload = new URLSearchParams();
-      payload.append("action", "transferTicket");
-      payload.append("fullName", formData.fullName);
-      payload.append("phoneNumber", formData.phoneNumber);
-      payload.append("emailAddress", formData.emailAddress);
-      payload.append("seatNumbers", formData.seatNumbers);
-      payload.append("ticketId", selectedTicketId);  // Make sure we're sending the ticketId here
+      payload.append('action', 'transferTicket');
+      payload.append('fullName', formData.fullName);
+      payload.append('phoneNumber', formData.phoneNumber);
+      payload.append('emailAddress', formData.emailAddress);
+      payload.append('seatNumbers', formData.seatNumbers);
+      payload.append('ticketId', selectedTicketId);
+  
+      // Use admin data with fallbacks
+      payload.append('timestamp', timestamp);
+      payload.append('admin', admin.username);
+      
+      // Use fallbacks for sender information
+      const senderName = admin.senderName || 'Theresa Labirre';
+      const senderEmail = admin.senderEmail || 'theresalabire@gmail.com';
+      
+      payload.append('senderName', senderName);
+      payload.append('senderEmail', senderEmail);
   
       const response = await fetch(APP_SCRIPT_POST_URL, {
         method: 'POST',
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
         body: payload.toString()
       });
   
@@ -67,11 +105,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       }
   
       const data = await response.json();
+  
       if (data.error) {
         setError(data.error);
       } else {
-        onAddUser(); // Refresh user table
-        onClose(); // Close the modal
+        onAddUser();
+        onClose();
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -83,7 +122,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
@@ -119,19 +158,18 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               className="w-full p-2 border border-gray-300 rounded"
             />
           </div>
-          
-          {/* Ticket Selection Dropdown */}
+
           <div className="space-y-2">
             <label className="block text-sm">Select Ticket</label>
             <select
-              value={selectedTicketId} // Ensure the ticketId is being correctly tracked
-              onChange={(e) => setSelectedTicketId(e.target.value)} // This should update with the ticketId
+              value={selectedTicketId}
+              onChange={e => setSelectedTicketId(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             >
               <option value="">--Select a Ticket--</option>
               {tickets.map(ticket => (
-                <option key={ticket.ticketId} value={ticket.ticketId}> 
-                  {ticket.eventName} {/* The eventName is just for display */}
+                <option key={ticket.ticketId} value={ticket.ticketId}>
+                  {ticket.eventName}
                 </option>
               ))}
             </select>

@@ -26,6 +26,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
 
     try {
       await fetchAdminData(username, password);
+      // Debug the admin data structure
+      const adminData = sessionStorage.getItem("adminData");
+      if (adminData) {
+        console.log("Admin data structure:", JSON.parse(adminData));
+      }  
       fetchAllUsers();
       setLoggedInAdmin(username);
       sessionStorage.setItem("loggedInAdmin", username);

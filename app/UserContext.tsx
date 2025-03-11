@@ -79,7 +79,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const adminData = data.find((admin) => admin.username === username && admin.password === password);
       if (adminData) {
         setAdmin(adminData); // Set the admin data in context
-        sessionStorage.setItem("loggedInAdmin", username); // Store in sessionStorage
+        sessionStorage.setItem("loggedInAdmin", username); // Store username
+        sessionStorage.setItem("adminData", JSON.stringify(adminData)); // Store full admin data
       } else {
         alert("Invalid admin credentials!");
       }
@@ -89,6 +90,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+
 
   // Fetch user data by userId
   const fetchUserData = async (id: string) => {
@@ -248,6 +250,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     return () => clearInterval(interval);
   }, [searchParams, router, user]); // Added 'user' dependency here
+
+  // Add this to your useEffect in UserContext.tsx
+  useEffect(() => {
+    // Check for stored admin data
+    const loggedInAdminUsername = sessionStorage.getItem("loggedInAdmin");
+    const storedAdminData = sessionStorage.getItem("adminData");
+    
+    if (storedAdminData) {
+      try {
+        setAdmin(JSON.parse(storedAdminData));
+      } catch (e) {
+        console.error("Error parsing stored admin data", e);
+        sessionStorage.removeItem("adminData");
+      }
+    } else if (loggedInAdminUsername) {
+      // If we only have the username but not the full data, try to fetch it
+      fetchAdminData(loggedInAdminUsername, ""); // Password will be ignored in this case
+    }
+  }, []);
+
 
   return (
     <UserContext.Provider

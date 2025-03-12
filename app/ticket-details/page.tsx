@@ -1,44 +1,39 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react'; // Import useRef
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
 import { useUser } from '../UserContext';
 
-// App Script URL for ticket approval
 const APP_SCRIPT_POST_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
 
 export default function TicketDetails() {
   const router = useRouter();
   const { user, loading: userLoading } = useUser();
   const [loading, setLoading] = useState(false);
-  const [approvalStatus, setApprovalStatus] = useState('pending'); // pending, processing, approved, declined
-
-  // Set initial approval status based on user data as soon as it loads
+  const [approvalStatus, setApprovalStatus] = useState('pending');
   const [pageReady, setPageReady] = useState(false);
+  const initialStatusSet = useRef(false); // Use useRef to track initial status setting
 
   useEffect(() => {
-    if (!user) return;
-  
-    if (
-      user.systemStatus === "DECLINED" ||
-      user.systemStatus === "RETRACTED" ||
-      user.systemStatus === "CANCELLED"
-    ) {
+    if (!user || initialStatusSet.current) return; // Prevent re-runs after initial setup
+
+    if (user.systemStatus === "DECLINED" || user.systemStatus === "RETRACTED" || user.systemStatus === "CANCELLED") {
       router.push('/invalid');
       return;
     }
-  
+
     if (user.systemStatus === "WAITING APPROVAL") {
       setApprovalStatus('pending');
     } else if (user.systemStatus === "WAITING COMPLETION" || user.systemStatus === "COMPLETED") {
       setApprovalStatus('approved');
     }
-  
-    setPageReady(true); // done handling user status!
-  }, [user, router]);
+
+    setPageReady(true);
+    initialStatusSet.current = true; // Mark initial status as set
+  }, [user, router]); // Remove approvalStatus and pageReady from dependencies
   
   
 

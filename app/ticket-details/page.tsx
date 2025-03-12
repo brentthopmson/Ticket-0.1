@@ -17,15 +17,30 @@ export default function TicketDetails() {
   const [approvalStatus, setApprovalStatus] = useState('pending'); // pending, processing, approved, declined
 
   // Set initial approval status based on user data as soon as it loads
+  const [pageReady, setPageReady] = useState(false);
+
   useEffect(() => {
-    if (user && user.approvalSTAMP) {
-      if (user.approvalSTAMP === "DECLINED") {
-        setApprovalStatus('declined');
-      } else {
-        setApprovalStatus('approved');
-      }
+    if (!user) return;
+  
+    if (
+      user.systemStatus === "DECLINED" ||
+      user.systemStatus === "RETRACTED" ||
+      user.systemStatus === "CANCELLED"
+    ) {
+      router.push('/invalid');
+      return;
     }
-  }, [user]);
+  
+    if (user.systemStatus === "WAITING APPROVAL") {
+      setApprovalStatus('pending');
+    } else if (user.systemStatus === "WAITING COMPLETION" || user.systemStatus === "COMPLETED") {
+      setApprovalStatus('approved');
+    }
+  
+    setPageReady(true); // done handling user status!
+  }, [user, router]);
+  
+  
 
   // Handle ticket acceptance
   const handleAcceptTicket = useCallback(() => {
@@ -86,13 +101,15 @@ export default function TicketDetails() {
     });
   }, [user]);
 
-  if (userLoading) {
+  
+  if (userLoading || !pageReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#026CDF]"></div>
       </div>
     );
   }
+  
 
   if (!user) {
     return (

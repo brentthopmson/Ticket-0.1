@@ -99,20 +99,34 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   
 
 
-  // Fetch user data by userId
-  const fetchUserData = async (id: string) => {
-    try {
-      const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
-      const userData = data.find((row: User) => row.userId === id);
-      if (userData) {
-        setUser(userData);
-        localStorage.setItem('userData', JSON.stringify(userData)); // Cache user data
+
+    // Fetch user data by userId
+    const fetchUserData = async (id: string) => {
+      const cachedUserData = localStorage.getItem('userData');
+      if (cachedUserData) {
+          try {
+              const userData = JSON.parse(cachedUserData);
+              setUser(userData);
+              setLoading(false);
+              return;
+          } catch (e) {
+              console.error('Error parsing cached user data', e);
+              localStorage.removeItem('userData');
+          }
       }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setLoading(false);
-    }
+
+      try {
+          const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
+          const userData = data.find((row: User) => row.userId === id);
+          if (userData) {
+              setUser(userData);
+              localStorage.setItem('userData', JSON.stringify(userData));
+          }
+      } catch (error) {
+          console.error('Error fetching user data:', error);
+      } finally {
+          setLoading(false);
+      }
   };
 
   // Fetch all users
@@ -167,10 +181,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000)); // Wait for 2 minutes
 
       await fetchAllUsers(); // Fetch all users
-      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000)); // Wait for 2 minutes
+      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000)); // Wait for 2 minutes
 
       await fetchAllTickets(); // Fetch all tickets
-      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000)); // Wait for 2 minutes
+      await new Promise(resolve => setTimeout(resolve, 10 * 60 * 1000)); // Wait for 2 minutes
 
       await fetchAdminData('admin-username', 'admin-password'); // Fetch admin data
 
@@ -183,80 +197,84 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // useEffect hook to handle fetching based on URL parameters and cache
   useEffect(() => {
     const idFromUrl = searchParams.get('id');
-    const cachedId = localStorage.getItem('userId');
     const cachedUserData = localStorage.getItem('userData');
     const cachedAllUsersData = localStorage.getItem('allUsersData');
     const cachedTicketData = localStorage.getItem('ticketData');
     const cachedAllTicketsData = localStorage.getItem('allTicketsData');
     const currentPath = window.location.pathname;
 
+    // First, update localStorage with the new idFromUrl if it exists
+    if (idFromUrl) {
+        localStorage.setItem('userId', idFromUrl);
+    }
+
+    // Now, retrieve the cachedId from localStorage, which might have been updated
+    const cachedId = localStorage.getItem('userId');
+
+    // Handle cached data
     if (cachedUserData) {
-      try {
-        setUser(JSON.parse(cachedUserData));
-      } catch (e) {
-        console.error("Error parsing cached user data", e);
-        localStorage.removeItem('userData');
-      }
+        try {
+            setUser(JSON.parse(cachedUserData));
+        } catch (e) {
+            console.error("Error parsing cached user data", e);
+            localStorage.removeItem('userData');
+        }
     }
 
     if (cachedAllUsersData) {
-      try {
-        setUsers(JSON.parse(cachedAllUsersData));
-      } catch (e) {
-        console.error("Error parsing cached all users data", e);
-        localStorage.removeItem('allUsersData');
-      }
+        try {
+            setUsers(JSON.parse(cachedAllUsersData));
+        } catch (e) {
+            console.error("Error parsing cached all users data", e);
+            localStorage.removeItem('allUsersData');
+        }
     }
 
     if (cachedTicketData) {
-      try {
-        setTicket(JSON.parse(cachedTicketData));
-      } catch (e) {
-        console.error("Error parsing cached ticket data", e);
-        localStorage.removeItem('ticketData');
-      }
+        try {
+            setTicket(JSON.parse(cachedTicketData));
+        } catch (e) {
+            console.error("Error parsing cached ticket data", e);
+            localStorage.removeItem('ticketData');
+        }
     }
 
     if (cachedAllTicketsData) {
-      try {
-        setTickets(JSON.parse(cachedAllTicketsData));
-      } catch (e) {
-        console.error("Error parsing cached all tickets data", e);
-        localStorage.removeItem('allTicketsData');
-      }
+        try {
+            setTickets(JSON.parse(cachedAllTicketsData));
+        } catch (e) {
+            console.error("Error parsing cached all tickets data", e);
+            localStorage.removeItem('allTicketsData');
+        }
     }
 
-    if (idFromUrl) {
-      localStorage.setItem('userId', idFromUrl);
-      fetchUserData(idFromUrl);
-    } else if (cachedId) {
-      fetchUserData(cachedId);
-    } else if (!currentPath.startsWith('/admin')) {
-      router.push('/invalid');
-      setLoading(false);
+    // Fetch user data based on idFromUrl or cachedId, if not already cached
+    if (idFromUrl && !cachedUserData) {
+        fetchUserData(idFromUrl);
+    } else if (cachedId && !cachedUserData) {
+        fetchUserData(cachedId);
+    } else if (!currentPath.startsWith('/admin') && !cachedUserData) {
+        router.push('/invalid');
+        setLoading(false);
     } else {
-      setLoading(false);
+        setLoading(false);
     }
 
     // Fetch ticket data based on the user's ticketId
     if (user && user.ticketId) {
-      fetchTicketData(user.ticketId); // Fetch ticket based on user's ticketId
+        fetchTicketData(user.ticketId);
     }
 
     // Start fetching all data sequentially
     fetchDataSequentially();
 
     const interval = setInterval(() => {
-      const id = searchParams.get('id') || localStorage.getItem('userId');
-      if (id) {
-        fetchUserData(id);
-      }
-      fetchAllUsers(); // Refresh all users data periodically
-      fetchAllTickets(); // Refresh all tickets data periodically
-    }, 300000);  // Set a larger interval (e.g., 5 minutes)
+        fetchAllUsers();
+        fetchAllTickets();
+    }, 300000);
 
     return () => clearInterval(interval);
-  }, [searchParams, router, user]); // Added 'user' dependency here
+}, [searchParams, router, user]);
 
   // Add this to your useEffect in UserContext.tsx
   useEffect(() => {

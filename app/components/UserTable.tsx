@@ -53,7 +53,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
-              Add User
+              Send Ticket
             </button>
           </div>
         </div>

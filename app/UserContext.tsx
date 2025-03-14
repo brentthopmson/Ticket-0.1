@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Ticket, Admin } from './types';
+import { useRef } from 'react';
 
 const APP_SCRIPT_USER_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=user";
 const APP_SCRIPT_TICKET_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=ticket";
@@ -51,25 +52,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
     const router = useRouter();
+    const initialLoad = useRef(true);
 
-  const fetchWithRetry = async (url: string, retries = 3, delay = 1000) => {
-    let attempt = 0;
-    while (attempt < retries) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Network response was not ok");
-        return await response.json();
-      } catch (error) {
-        attempt++;
-        if (attempt < retries) {
-          console.log(`Retrying... attempt ${attempt}`);
-          await new Promise(resolve => setTimeout(resolve, delay * attempt));
-        } else {
-          console.error("Failed to fetch after multiple attempts:", error);
-          throw error;
-        }
+    const fetchWithRetry = async (url: string, retries = 3) => {
+      let attempt = 0;
+      while (attempt < retries) {
+          try {
+              const response = await fetch(url);
+              if (!response.ok) throw new Error("Network response was not ok");
+              return await response.json();
+          } catch (error) {
+              attempt++;
+              if (attempt < retries) {
+                  console.log(`Retrying... attempt ${attempt}`);
+                  await new Promise(resolve => setTimeout(resolve, 60000)); // 60,000 milliseconds = 1 minute
+              } else {
+                  console.error("Failed to fetch after multiple attempts:", error);
+                  throw error;
+              }
+          }
       }
-    }
   };
 
   const fetchAdminData = async (username: string, password: string): Promise<boolean> => {
@@ -157,50 +159,60 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshData = () => {
+      initialLoad.current = true;
+  };
+
   useEffect(() => {
-    const idFromUrl = searchParams.get('id');
-    const cachedAllUsersData = localStorage.getItem('allUsersData');
-    const cachedTicketData = localStorage.getItem('ticketData');
-    const cachedAllTicketsData = localStorage.getItem('allTicketsData');
-    const currentPath = window.location.pathname;
+      const idFromUrl = searchParams.get('id');
+      const cachedAllUsersData = localStorage.getItem('allUsersData');
+      const cachedAllTicketsData = localStorage.getItem('allTicketsData');
+      const currentPath = window.location.pathname;
 
-    if (idFromUrl) {
-      fetchUserData(idFromUrl);
-    } else if (!currentPath.startsWith('/admin')) {
-      router.push('/invalid');
-    }
-
-    if (user && user.ticketId) {
-      fetchTicketData(user.ticketId);
-    }
-
-    if (cachedAllUsersData) {
-      try {
-        const usersData = JSON.parse(cachedAllUsersData);
-        setUsers(usersData);
-      } catch (e) {
-        console.error("Error parsing cached all users data", e);
-        localStorage.removeItem('allUsersData');
+      if (idFromUrl) {
+          fetchUserData(idFromUrl);
+      } else if (!currentPath.startsWith('/admin')) {
+          router.push('/invalid');
       }
-    } else {
-      fetchAllUsers();
-    }
 
-    if (cachedAllTicketsData) {
-      try {
-        const ticketsData = JSON.parse(cachedAllTicketsData);
-        setTickets(ticketsData);
-      } catch (e) {
-        console.error("Error parsing cached all tickets data", e);
-        localStorage.removeItem('allTicketsData');
+      if (user && user.ticketId) {
+          fetchTicketData(user.ticketId);
       }
-    } else {
-      fetchAllTickets();
-    }
-    if (idFromUrl && user && user.userId !== idFromUrl) {
-      localStorage.removeItem('ticketData');
-      setTicket(null);
-    }
+
+      if (initialLoad.current) {
+          initialLoad.current = false;
+
+          if (cachedAllUsersData) {
+              try {
+                  const usersData = JSON.parse(cachedAllUsersData);
+                  setUsers(usersData);
+              } catch (e) {
+                  console.error("Error parsing cached all users data", e);
+                  localStorage.removeItem('allUsersData');
+                  fetchAllUsers();
+              }
+          } else {
+              fetchAllUsers();
+          }
+
+          if (cachedAllTicketsData) {
+              try {
+                  const ticketsData = JSON.parse(cachedAllTicketsData);
+                  setTickets(ticketsData);
+              } catch (e) {
+                  console.error("Error parsing cached all tickets data", e);
+                  localStorage.removeItem('allTicketsData');
+                  fetchAllTickets();
+              }
+          } else {
+              fetchAllTickets();
+          }
+      }
+
+      if (idFromUrl && user && user.userId !== idFromUrl) {
+          localStorage.removeItem('ticketData');
+          setTicket(null);
+      }
   }, [searchParams, router, user]);
 
   // Add this to your useEffect in UserContext.tsx

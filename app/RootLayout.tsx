@@ -124,7 +124,7 @@ export default function RootLayout({
                       More
                     </button>
 
-                    {loggedInAdmin ? (
+                    {/* {loggedInAdmin ? (
                       <button
                         onClick={handleLogout}
                         className="bg-[#F5A623] text-[#001B41] px-4 py-2 rounded font-medium hover:bg-[#f7b84c] transition"
@@ -138,7 +138,7 @@ export default function RootLayout({
                       >
                         Sign In
                       </Link>
-                    )}
+                    )} */}
                   </div>
 
                   {/* Mobile menu */}

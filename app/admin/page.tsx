@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     useEffect(() => {
         const adminUsername = sessionStorage.getItem("loggedInAdmin");
         const adminData = sessionStorage.getItem('adminData');
-
+    
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
@@ -58,7 +58,11 @@ export default function AdminDashboard() {
             setLoggedInAdmin(null);
             setIsSessionValid(false); // Session is invalid
         }
-    }, [fetchAllUsers, fetchAllTickets, setAdmin]);
+    }, [setAdmin]); // Removed `fetchAllUsers` and `fetchAllTickets` from dependency array
+
+    
+    
+
 
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(allUsers)) {

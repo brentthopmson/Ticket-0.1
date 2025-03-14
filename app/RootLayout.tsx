@@ -68,16 +68,20 @@ export default function RootLayout({
                 {/* Top navigation bar */}
                 <div className="bg-[#001B41] text-white py-1 px-4">
                   <div className="container mx-auto flex justify-end items-center text-xs">
-                    <button
-                      onClick={() => openTicketmasterLink('/help')}
-                      className="mr-4 hover:underline"
-                    >
-                      Help
-                    </button>
-                    <Link href="/my-account" className="flex items-center hover:underline">
-                      <FontAwesomeIcon icon={faUser} className="mr-1" />
-                      My Account
-                    </Link>
+                  <button
+                    onClick={() => openTicketmasterLink('/help')}
+                    className="mr-4 hover:underline"
+                  >
+                    Help
+                  </button>
+                  
+                  <button 
+                    onClick={() => openTicketmasterLink('/member')} 
+                    className="flex items-center hover:underline"
+                  >
+                    <FontAwesomeIcon icon={faUser} className="mr-1" />
+                    My Account
+                  </button>
                   </div>
                 </div>
 

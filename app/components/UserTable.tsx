@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderOpen, faPaperPlane, faTicketAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
-import AddUserModal from './AddUserModal'; // Add new modal component for adding users
+import { faFolderOpen, faPaperPlane, faTicketAlt, faPlus, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import AddUserModal from './AddUserModal';
 import { User, Ticket } from '../types';
+import { useUser } from '../UserContext';
 
 interface UserTableProps {
   users: User[];
@@ -10,28 +11,58 @@ interface UserTableProps {
 }
 
 const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
+  const { fetchAllUsers } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserFormData, setNewUserFormData] = useState({
     fullName: '',
     phoneNumber: '',
     emailAddress: '',
-    seatNumbers: '', // You can add seat numbers if necessary
+    seatNumbers: '',
   });
+  const [isActionLoading, setIsActionLoading] = useState(false);
+
+  // Define the APP_SCRIPT_POST_URL here
+  const APP_SCRIPT_POST_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  // This handles adding a user (without submitting in the table, modal will take care of submission)
   const handleAddUser = () => {
-    setShowAddUserModal(true); // Show the modal for adding a user
+    setShowAddUserModal(true);
   };
 
   const filteredUsers = users.filter(user => {
     const searchString = `${user.fullName} ${user.phoneNumber} ${user.emailAddress} ${user.ticketFolderId} ${user.eventName} ${user.section} ${user.adminStatus}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
+
+  const handleRetractTransfer = useCallback((user: User) => {
+    if (window.confirm("Are you sure you want to retract this ticket transfer?")) {
+      setIsActionLoading(true);
+
+      let payload = new URLSearchParams();
+      payload.append("action", "retractTicket");
+      payload.append("userId", user?.userId as string);
+      payload.append("cancelledSTAMP", "RETRACTED");
+
+      fetch(APP_SCRIPT_POST_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: payload.toString()
+      }).then(() => {
+        setTimeout(() => {
+          fetchAllUsers(); // Refresh users list
+          setIsActionLoading(false);
+        }, 1000);
+      }).catch(error => {
+        console.error("Error retracting ticket:", error);
+        fetchAllUsers(); // Refresh users list
+        setIsActionLoading(false);
+      });
+    }
+  }, [APP_SCRIPT_POST_URL]);
 
   return (
     <>
@@ -94,15 +125,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                   </td>
                   <td className="border p-2 text-sm">
                     <div className="flex items-center justify-center space-x-3">
-                      <a
-                        href={user.adminSMSStatus}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Send SMS"
-                      >
-                        <FontAwesomeIcon icon={faPaperPlane} />
-                      </a>
                       {user.ticketFolderId && (
                         <a
                           href={`https://drive.google.com/drive/folders/${user.ticketFolderId}`}
@@ -113,6 +135,16 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                         >
                           <FontAwesomeIcon icon={faFolderOpen} />
                         </a>
+                      )}
+                      {['WAITING APPROVAL', 'WAITING COMPLETION', 'COMPLETED'].includes(user.systemStatus) && (
+                        <button
+                          onClick={() => handleRetractTransfer(user)}
+                          disabled={isActionLoading}
+                          className="text-red-600 hover:text-red-800"
+                          title="Retract Transfer"
+                        >
+                          {isActionLoading ? <span className="animate-spin">Loading...</span> : <FontAwesomeIcon icon={faTimesCircle} />}
+                        </button>
                       )}
                     </div>
                   </td>
@@ -129,7 +161,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
         )}
       </section>
 
-      {/* Add User Modal */}
       {showAddUserModal && (
         <AddUserModal
           tickets={tickets}

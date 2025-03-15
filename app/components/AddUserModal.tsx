@@ -32,7 +32,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onAddUser,
   onClose
 }) => {
-  const { admin } = useUser();
+  const { admin, fetchAllUsers } = useUser();
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,10 +99,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       const data = await response.json();
 
       console.log('Response:', data);
+      
+      fetchAllUsers(); // Refresh users list
 
       if (data.error) {
         setError(data.error);
       } else {
+        fetchAllUsers(); // Refresh users list
         onAddUser();
         onClose();
       }
@@ -113,6 +116,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         setError('An unknown error occurred.');
       }
     } finally {
+      fetchAllUsers(); // Refresh users list
       setLoading(false);
     }
   };

@@ -20,7 +20,7 @@ export default function TicketDetails() {
     useEffect(() => {
         if (!user || initialStatusSet.current) return;
 
-        if (user.systemStatus === "DECLINED" || user.systemStatus === "COMPLETED" || user.systemStatus === "RETRACTED" || user.systemStatus === "CANCELLED") {
+        if (user.systemStatus === "DECLINED" || user.systemStatus === "RETRACTED" || user.systemStatus === "CANCELLED") {
             router.push('/invalid');
             return;
         }

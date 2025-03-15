@@ -63,11 +63,11 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="border p-2 text-sm text-left">Full Name</th>
-                <th className="border p-2 text-sm text-left">Phone Number</th>
+                <th className="border p-2 text-sm text-left hidden lg:table-cell">Phone Number</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Email Address</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Event</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Section</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">Status</th>
+                <th className="border p-2 text-sm text-left">Status</th>
                 <th className="border p-2 text-sm text-center">Actions</th>
               </tr>
             </thead>
@@ -75,11 +75,11 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
               {filteredUsers.map(user => (
                 <tr key={user.userId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="border p-2 text-sm">{user.fullName}</td>
-                  <td className="border p-2 text-sm">{user.phoneNumber}</td>
+                  <td className="border p-2 text-sm hidden lg:table-cell">{user.phoneNumber}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.emailAddress}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.eventName}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.section}</td>
-                  <td className="border p-2 text-sm hidden lg:table-cell">
+                  <td className="border p-2 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
                         user.systemStatus === 'ACTIVE'

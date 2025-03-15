@@ -72,7 +72,13 @@ export default function AdminDashboard() {
             setFilteredUsers([]); // Reset filtered users if session is invalid
         }
     }, [allUsers, loggedInAdmin, isSessionValid]);
-
+    
+    useEffect(() => {
+        if (isSessionValid === false) {
+            router.replace('/admin'); // Redirect to login page if session is invalid
+        }
+    }, [isSessionValid]);
+    
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(allTickets)) {
             const filteredTickets = allTickets.filter((t) => t.admin === loggedInAdmin);

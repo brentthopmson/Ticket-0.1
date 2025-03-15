@@ -82,6 +82,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       payload.append('senderName', senderName);
       payload.append('senderEmail', senderEmail);
 
+      console.log('Payload:', payload.toString());
+
       const response = await fetch(APP_SCRIPT_POST_URL, {
         method: 'POST',
         headers: {
@@ -95,6 +97,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       }
 
       const data = await response.json();
+
+      console.log('Response:', data);
 
       if (data.error) {
         setError(data.error);

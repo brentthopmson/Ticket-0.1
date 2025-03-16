@@ -77,8 +77,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       payload.append('ticketId', selectedTicketId);
       payload.append('timestamp', timestamp);
       payload.append('admin', admin.username);
-      const senderName = admin.senderName || 'Theresa Labirre';
-      const senderEmail = admin.senderEmail || 'theresalabire@gmail.com';
+      const senderName = admin.senderName || 'jaelynn';
+      const senderEmail = admin.senderEmail || 'ariellynie@icloud.com';
       payload.append('senderName', senderName);
       payload.append('senderEmail', senderEmail);
 

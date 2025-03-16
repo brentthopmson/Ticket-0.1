@@ -23,6 +23,7 @@ interface UserContextProps {
     fetchAllUsers: () => Promise<void>;
     fetchAllTickets: () => Promise<void>;
     fetchAdminData: (username: string, password: string) => Promise<boolean>;
+    fetchUserData: (id: string) => Promise<User | null>; // Corrected declaration
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -41,6 +42,7 @@ const UserContext = createContext<UserContextProps>({
     fetchAllUsers: async () => { },
     fetchAllTickets: async () => { },
     fetchAdminData: async () => false,
+    fetchUserData: async () => null, // Corrected default implementation
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -99,23 +101,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const fetchUserData = async (id: string) => {
-    try {
-      //setLoading(true);
-      const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
-      const userData = data.find((row: User) => row.userId === id);
-      if (userData) {
-        setUser(userData);
-      } else {
-        router.push('/invalid');
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      router.push('/invalid');
-    } finally {
-      //setLoading(false);
-    }
-  };
+
+    const fetchUserData = async (id: string): Promise<User | null> => { // Corrected implementation
+        try {
+            const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
+            const userData = data.find((row: User) => row.userId === id);
+            if (userData) {
+                setUser(userData);
+                return userData;
+            } else {
+                router.push('/invalid');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            router.push('/invalid');
+            return null;
+        } finally {
+            //setLoading(false);
+        }
+    };
 
   const fetchAllUsers = async () => {
     try {
@@ -172,7 +177,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (idFromUrl) {
           fetchUserData(idFromUrl);
       } else if (!currentPath.startsWith('/admin')) {
-          router.push('/invalid');
+          //router.push('/invalid');
       }
 
       if (user && user.ticketId) {
@@ -252,6 +257,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
               fetchAllUsers,
               fetchAllTickets,
               fetchAdminData,
+              fetchUserData, // ADD THIS
       }}
     >
       {children}

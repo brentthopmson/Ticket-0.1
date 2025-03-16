@@ -1,46 +1,88 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
-import { useUser } from '../UserContext';
+import { useUser } from '../../UserContext';
 
 const APP_SCRIPT_POST_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
 
 export default function TicketDetails() {
     const router = useRouter();
-    const { user } = useUser();
+    const { fetchUserData } = useUser();
     const [approvalStatus, setApprovalStatus] = useState('pending');
     const [pageReady, setPageReady] = useState(false);
     const initialStatusSet = useRef(false);
-    const [isActionLoading, setIsActionLoading] = useState(false); // Local loading state
+    const [isActionLoading, setIsActionLoading] = useState(false);
+    const params = useParams();
+    const userId = params.id as string;
+    console.log(userId);
+    const [user, setUser] = useState<any | null>(null);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
-        if (!user || initialStatusSet.current) return;
+        if (userId) {
+            const fetchAndSetUser = async () => {
+                setLoading(true); // Set loading to true
+                try {
+                    const fetchedUser = await fetchUserData(userId);
+                    console.log("Fetched user:", fetchedUser);
 
-        if (user.systemStatus === "DECLINED" || user.systemStatus === "RETRACTED" || user.systemStatus === "CANCELLED") {
+                    if (fetchedUser) {
+                        setUser(fetchedUser);
+                    } else {
+                        console.error("User not found for userId:", userId);
+                        router.push('/invalid');
+                    }
+                } catch (error) {
+                    console.error("Error fetching user:", error);
+                    router.push('/invalid');
+                } finally {
+                    setLoading(false); // Set loading to false
+                }
+            };
+            fetchAndSetUser();
+        } else {
+            console.error("userId is undefined");
             router.push('/invalid');
-            return;
+            setLoading(false);
         }
+    }, [userId, fetchUserData, router]);
 
-        if (user.systemStatus === "WAITING APPROVAL") {
-            setApprovalStatus('pending');
-        } else if (user.systemStatus === "WAITING COMPLETION" || user.systemStatus === "COMPLETED") {
-            setApprovalStatus('approved');
-        }
-
-        setPageReady(true);
-        initialStatusSet.current = true;
-    }, [user, router]);
-
-
-
-      const handleAcceptTicket = useCallback(() => {
+    useEffect(() => {
+      if (user && userId && !loading) {
+          console.log("user.systemStatus:", user.systemStatus);
+          console.log("Redirect condition:", user.systemStatus === "DECLINED" || user.systemStatus === "RETRACTED" || user.systemStatus === "CANCELLED");
+  
+          if (
+              user.systemStatus === "DECLINED" ||
+              user.systemStatus === "RETRACTED" ||
+              user.systemStatus === "CANCELLED"
+          ) {
+              router.push("/invalid");
+              return;
+          }
+  
+          if (user.systemStatus === "WAITING APPROVAL") {
+              setApprovalStatus("pending");
+          } else if (
+              user.systemStatus === "WAITING COMPLETION" ||
+              user.systemStatus === "COMPLETED"
+          ) {
+              setApprovalStatus("approved");
+          }
+  
+          setPageReady(true);
+          initialStatusSet.current = true;
+      }
+  }, [user, router, userId, loading]);
+  
+    const handleAcceptTicket = useCallback(() => {
         if (user?.approvalSTAMP) return;
 
-        setIsActionLoading(true); // Set loading to true
+        setIsActionLoading(true);
         setApprovalStatus('processing');
 
         const currentDate = new Date().toISOString();
@@ -56,19 +98,19 @@ export default function TicketDetails() {
         }).then(() => {
             setTimeout(() => {
                 setApprovalStatus('approved');
-                setIsActionLoading(false); // Set loading to false
+                setIsActionLoading(false);
             }, 10000);
         }).catch(error => {
             console.error("Error accepting ticket:", error);
             setApprovalStatus('pending');
-            setIsActionLoading(false); // Set loading to false on error
+            setIsActionLoading(false);
         });
     }, [user]);
 
     const handleDeclineTransfer = useCallback(() => {
         if (user?.approvalSTAMP) return;
 
-        setIsActionLoading(true); // Set loading to true
+        setIsActionLoading(true);
         setApprovalStatus('processing');
 
         let payload = new URLSearchParams();
@@ -83,15 +125,15 @@ export default function TicketDetails() {
         }).then(() => {
             setTimeout(() => {
                 setApprovalStatus('declined');
-                setIsActionLoading(false); // Set loading to false
+                setIsActionLoading(false);
             }, 10000);
         }).catch(error => {
             console.error("Error declining ticket:", error);
             setApprovalStatus('pending');
-            setIsActionLoading(false); // Set loading to false on error
+            setIsActionLoading(false);
         });
     }, [user]);
-    
+
     if (!pageReady) {
         return (
             <div className="min-h-screen flex items-center justify-center">

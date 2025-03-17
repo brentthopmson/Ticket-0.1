@@ -103,7 +103,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map(user => (
+              {filteredUsers.reverse().map(user => (
                 <tr key={user.userId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="border p-2 text-sm">{user.fullName}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.phoneNumber}</td>

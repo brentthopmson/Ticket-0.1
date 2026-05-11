@@ -4,39 +4,55 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-rgb: 255, 255, 255;
+  --viagogo-green: 137, 207, 40; /* #89CF28 */
+  --viagogo-dark: 0, 27, 65;    /* #001B41 */
+  --viagogo-gray: 248, 249, 250;
+  --viagogo-text-secondary: 83, 87, 90; /* #53575A */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
+
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    ),
-    rgb(var(--background-start-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Custom Viagogo Components */
+.viagogo-button-primary {
+  @apply bg-[#89CF28] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#7ab121] transition-all active:scale-95;
+}
+
+.viagogo-input {
+  @apply w-full py-3 px-5 rounded-full border border-gray-200 focus:border-[#89CF28] focus:ring-2 focus:ring-[#89CF28] focus:ring-opacity-20 outline-none transition-all;
+}
+
+.viagogo-card {
+  @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100;
+}
+
+/* Utilities */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Spinner styles */
 .loader {
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 3px solid rgba(137, 207, 40, 0.1);
   border-radius: 50%;
-  border-top: 4px solid #3498db;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
+  border-top: 3px solid #89CF28;
+  width: 28px;
+  height: 28px;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+

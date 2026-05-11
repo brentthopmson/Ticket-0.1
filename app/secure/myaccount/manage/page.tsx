@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '../UserContext';
-import AdminLogin from '../components/AdminLogin';
-import UserTable from '../components/UserTable';
-import TicketTable from '../components/TicketTable';
-import { User, Ticket } from '../types';
+import { useUser } from '../../../UserContext';
+import AdminLogin from '../../../components/AdminLogin';
+import UserTable from '../../../components/UserTable';
+import TicketTable from '../../../components/TicketTable';
+import { User, Ticket } from '../../../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsers, faTicketAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faTicketAlt, faSignOutAlt, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link';
 
-export default function AdminDashboard() {
+export default function ManageDashboard() {
     const router = useRouter();
     const {
         admin,
@@ -28,7 +29,7 @@ export default function AdminDashboard() {
     const [users, setFilteredUsers] = useState<User[]>([]);
     const [tickets, setFilteredTickets] = useState<Ticket[]>([]);
     const [activeTab, setActiveTab] = useState<'users' | 'tickets'>('users');
-    const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null); // Track session validity
+    const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
 
     useEffect(() => {
         const adminUsername = sessionStorage.getItem("loggedInAdmin");
@@ -39,7 +40,7 @@ export default function AdminDashboard() {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
                 setLoggedInAdmin(adminUsername);
-                setIsSessionValid(true); // Session is valid
+                setIsSessionValid(true);
                 fetchAllUsers();
                 fetchAllTickets();
             } catch (e) {
@@ -48,43 +49,34 @@ export default function AdminDashboard() {
                 sessionStorage.removeItem('loggedInAdmin');
                 setAdmin(null);
                 setLoggedInAdmin(null);
-                setIsSessionValid(false); // Session is invalid
+                setIsSessionValid(false);
             }
-        } else if (adminUsername) {
-            sessionStorage.removeItem('loggedInAdmin');
-            setLoggedInAdmin(null);
-            setIsSessionValid(false); // Session is invalid
         } else {
-            setLoggedInAdmin(null);
-            setIsSessionValid(false); // Session is invalid
+            setIsSessionValid(false);
         }
-    }, [setAdmin]); // Removed `fetchAllUsers` and `fetchAllTickets` from dependency array
-
-    
-    
-
+    }, [setAdmin]);
 
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(allUsers)) {
             const filteredUsers = allUsers.filter((u) => u.admin === loggedInAdmin);
             setFilteredUsers(filteredUsers);
         } else {
-            setFilteredUsers([]); // Reset filtered users if session is invalid
+            setFilteredUsers([]);
         }
     }, [allUsers, loggedInAdmin, isSessionValid]);
     
     useEffect(() => {
         if (isSessionValid === false) {
-            router.replace('/admin'); // Redirect to login page if session is invalid
+            router.replace('/admin');
         }
-    }, [isSessionValid]);
+    }, [isSessionValid, router]);
     
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(allTickets)) {
             const filteredTickets = allTickets.filter((t) => t.admin === loggedInAdmin);
             setFilteredTickets(filteredTickets);
         } else {
-            setFilteredTickets([]); // Reset filtered tickets if session is invalid
+            setFilteredTickets([]);
         }
     }, [allTickets, loggedInAdmin, isSessionValid]);
 
@@ -96,7 +88,7 @@ export default function AdminDashboard() {
         setLoading(false);
         setUsers([]);
         setTickets([]);
-        setIsSessionValid(false); // Explicitly invalidate session
+        setIsSessionValid(false);
         router.push('/admin');
     };
 
@@ -108,21 +100,26 @@ export default function AdminDashboard() {
         <main className="p-4 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg mb-6 flex flex-col md:flex-row justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 md:mb-0">
-                        Admin Dashboard
-                    </h1>
+                    <div className="flex items-center mb-4 md:mb-0">
+                        <Link href="/secure/myaccount/tickets" className="mr-4 text-gray-500 hover:text-gray-700">
+                            <FontAwesomeIcon icon={faChevronLeft} />
+                        </Link>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            Management Dashboard
+                        </h1>
+                    </div>
                     <div className="flex items-center space-x-4">
                         <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                             <button
                                 onClick={() => setActiveTab('users')}
-                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'users' ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'users' ? 'bg-[#008000] text-white' : 'text-gray-700 dark:text-gray-300'}`}
                             >
                                 <FontAwesomeIcon icon={faUsers} className="mr-2" />
                                 <span>Users</span>
                             </button>
                             <button
                                 onClick={() => setActiveTab('tickets')}
-                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'tickets' ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'tickets' ? 'bg-[#008000] text-white' : 'text-gray-700 dark:text-gray-300'}`}
                             >
                                 <FontAwesomeIcon icon={faTicketAlt} className="mr-2" />
                                 <span>Tickets</span>
@@ -143,6 +140,9 @@ export default function AdminDashboard() {
                     <TicketTable tickets={tickets} users={users} />
                 )}
             </div>
+            <footer className="py-8 text-center text-gray-400 text-sm">
+                © {new Date().getFullYear()} Viagogo Management.
+            </footer>
         </main>
     );
 }

@@ -20,6 +20,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
     sectionNo: '',
     row: '',
     seatNumbers: '',
+    platform: 'viagogo',
     ageRestriction: 'All Ages',
     coverImage: '',
     description: '',
@@ -29,6 +30,16 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const togglePlatform = (p: string) => {
+    setFormData(prev => {
+      const platforms = prev.platform ? prev.platform.split(',').map(item => item.trim()).filter(item => item !== "") : [];
+      const newPlatforms = platforms.includes(p)
+        ? platforms.filter(item => item !== p)
+        : [...platforms, p];
+      return { ...prev, platform: newPlatforms.join(',') };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +62,8 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
         payload.append(key, value);
       });
       
-      const response = await fetch("https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec", {
+      const POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
+      const response = await fetch(POST_URL, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: payload.toString()
@@ -76,85 +88,85 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add New Ticket</h2>
+        <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+          <h2 className="text-2xl font-black text-[#001B41]">Add New Ticket</h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-gray-400 hover:text-[#001B41] transition-colors"
           >
-            &times;
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
         
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Event Name*</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Event Name*</label>
               <input
                 type="text"
                 name="eventName"
                 value={formData.eventName}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Venue*</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Venue*</label>
               <input
                 type="text"
                 name="venue"
                 value={formData.venue}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Location*</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Location*</label>
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Date & Time*</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Date & Time*</label>
               <input
                 type="datetime-local"
                 name="dateTime"
                 value={formData.dateTime}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Door Time</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Door Time</label>
               <input
                 type="text"
                 name="doorTime"
                 value={formData.doorTime}
                 onChange={handleChange}
                 placeholder="e.g. 6:30 PM"
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Section*</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Section*</label>
               <select
                 name="section"
                 value={formData.section}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               >
                 <option value="">Select a section</option>
@@ -166,35 +178,71 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Section Number</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Section Number</label>
               <input
                 type="text"
                 name="sectionNo"
                 value={formData.sectionNo}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Row*</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Row*</label>
               <input
                 type="text"
                 name="row"
                 value={formData.row}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-1">Age Restriction</label>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Seat Numbers*</label>
+              <input
+                type="text"
+                name="seatNumbers"
+                placeholder="e.g. 101, 102"
+                value={formData.seatNumbers}
+                onChange={handleChange}
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Platforms*</label>
+              <div className="flex flex-wrap gap-2">
+                {['viagogo', 'ticketmaster', 'uefa'].map((p) => {
+                  const isSelected = formData.platform.split(',').includes(p);
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => togglePlatform(p)}
+                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border-2 ${
+                        isSelected 
+                          ? 'bg-[#89CF28] border-[#89CF28] text-white shadow-md shadow-[#89CF28]/20' 
+                          : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Age Restriction</label>
               <select
                 name="ageRestriction"
                 value={formData.ageRestriction}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               >
                 <option value="All Ages">All Ages</option>
                 <option value="18+">18+</option>
@@ -204,36 +252,36 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 dark:text-gray-300 mb-1">Cover Image URL</label>
+            <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Cover Image URL</label>
             <input
               type="url"
               name="coverImage"
               value={formData.coverImage}
               onChange={handleChange}
               placeholder="https://example.com/image.jpg"
-              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
             ></textarea>
           </div>
 
           <div className="mb-6">
-            <label className="block text-gray-700 dark:text-gray-300 mb-1">Terms & Conditions</label>
+            <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Terms & Conditions</label>
             <textarea
               name="terms"
               value={formData.terms}
               onChange={handleChange}
               rows={2}
-              className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
             ></textarea>
           </div>
           
@@ -248,23 +296,20 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+              className="px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-bold hover:bg-gray-200 transition-all"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+              className="px-8 py-3 bg-[#89CF28] text-white rounded-xl font-black shadow-lg shadow-[#89CF28]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-3"></div>
+                  Adding...
                 </>
               ) : (
                 'Add Ticket'

@@ -4,6 +4,7 @@ export interface User {
   admin: string;
   senderName: string;
   senderEmail: string;
+  userPlatform: string;
   timestamp: string;
   fullName: string;
   phoneNumber: string;
@@ -60,6 +61,9 @@ export interface Ticket {
   deletedSTAMP: string;
   eventStatus: string;
   ticketStatus: string;
+  platform: string;
+  seatNumbers?: string;
+  seat?: string;
 }
 
 
@@ -71,4 +75,6 @@ export interface Admin {
   senderName: string;
   senderEmail: string;
   telegramId: string;
+  allowedPlatform: string;
+  applePayNumber: string;
 }

@@ -1,11 +1,13 @@
+"use client";
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Ticket, Admin } from './types';
 import { useRef } from 'react';
 
-const APP_SCRIPT_USER_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=user";
-const APP_SCRIPT_TICKET_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec?sheetname=ticket";
-const APP_SCRIPT_ADMIN_URL = "https://script.google.com/macros/s/AKfycbwXIfuadHykMFrMdPPLLP7y0pm4oZ8TJUnM9SMmDp9BkaVLGu9jupU-CuW8Id-Mm1ylxg/exec?sheetname=admin";
+const APP_SCRIPT_USER_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_USER_URL || "";
+const APP_SCRIPT_TICKET_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_TICKET_URL || "";
+const APP_SCRIPT_ADMIN_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_ADMIN_URL || "";
 
 interface UserContextProps {
     user: User | null;
@@ -19,7 +21,8 @@ interface UserContextProps {
     setTicket: React.Dispatch<React.SetStateAction<Ticket | null>>;
     setTickets: React.Dispatch<React.SetStateAction<Ticket[]>>;
     setAdmin: React.Dispatch<React.SetStateAction<Admin | null>>;
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>; // Add setLoading here
+    setLoggedInAdmin: React.Dispatch<React.SetStateAction<string | null>>;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
     fetchAllUsers: () => Promise<void>;
     fetchAllTickets: () => Promise<void>;
     fetchAdminData: (username: string, password: string) => Promise<boolean>;
@@ -38,7 +41,8 @@ const UserContext = createContext<UserContextProps>({
     setTicket: () => { },
     setTickets: () => { },
     setAdmin: () => { },
-    setLoading: () => { }, // Add setLoading here
+    setLoggedInAdmin: () => { },
+    setLoading: () => { },
     fetchAllUsers: async () => { },
     fetchAllTickets: async () => { },
     fetchAdminData: async () => false,
@@ -51,6 +55,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [ticket, setTicket] = useState<Ticket | null>(null);
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [admin, setAdmin] = useState<Admin | null>(null);
+    const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -67,7 +72,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
               attempt++;
               if (attempt < retries) {
                   console.log(`Retrying... attempt ${attempt}`);
-                  await new Promise(resolve => setTimeout(resolve, 60000)); // 60,000 milliseconds = 1 minute
+                  await new Promise(resolve => setTimeout(resolve, 5000)); // 5 seconds
               } else {
                   console.error("Failed to fetch after multiple attempts:", error);
                   throw error;
@@ -81,7 +86,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       //setLoading(true);
       const data: Admin[] = await fetchWithRetry(APP_SCRIPT_ADMIN_URL);
       const adminData = data.find((admin) => admin.username === username && admin.password === password);
+      
       if (adminData) {
+        // Platform Validation: Check if "viagogo" is in the allowedPlatform list
+        // If the list is empty, we allow access by default for now (to avoid lockout)
+        const platformString = adminData.allowedPlatform?.toLowerCase() || "";
+        const allowedPlatforms = platformString.split(',').map(p => p.trim()).filter(p => p !== "");
+        
+        if (allowedPlatforms.length > 0 && !allowedPlatforms.includes("viagogo")) {
+          alert("Access denied: Your account is not authorized for the Viagogo platform.");
+          return false;
+        }
+
         setAdmin(adminData);
         sessionStorage.setItem("loggedInAdmin", username);
         sessionStorage.setItem("adminData", JSON.stringify(adminData));
@@ -126,7 +142,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     try {
       //setLoading(true);
       const data: User[] = await fetchWithRetry(APP_SCRIPT_USER_URL);
-      setUsers(data);
+      const adminUsername = sessionStorage.getItem("loggedInAdmin");
+      const filteredData = adminUsername ? data.filter(u => u.admin === adminUsername) : data;
+      setUsers(filteredData);
       localStorage.setItem('allUsersData', JSON.stringify(data));
     } catch (error) {
       console.error('Error fetching all users:', error);
@@ -155,7 +173,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     try {
       //setLoading(true);
       const data: Ticket[] = await fetchWithRetry(APP_SCRIPT_TICKET_URL);
-      setTickets(data);
+      const adminUsername = sessionStorage.getItem("loggedInAdmin");
+      const filteredData = adminUsername ? data.filter(t => t.admin === adminUsername) : data;
+      setTickets(filteredData);
       localStorage.setItem('allTicketsData', JSON.stringify(data));
     } catch (error) {
       console.error('Error fetching all tickets:', error);
@@ -176,7 +196,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       if (idFromUrl) {
           fetchUserData(idFromUrl);
-      } else if (!currentPath.startsWith('/admin')) {
+      } else if (!currentPath.startsWith('/login')) {
           //router.push('/invalid');
       }
 
@@ -190,7 +210,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           if (cachedAllUsersData) {
               try {
                   const usersData = JSON.parse(cachedAllUsersData);
-                  setUsers(usersData);
+                  const adminUsername = sessionStorage.getItem("loggedInAdmin");
+                  const filteredData = adminUsername ? usersData.filter((u: User) => u.admin === adminUsername) : usersData;
+                  setUsers(filteredData);
               } catch (e) {
                   console.error("Error parsing cached all users data", e);
                   localStorage.removeItem('allUsersData');
@@ -203,7 +225,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           if (cachedAllTicketsData) {
               try {
                   const ticketsData = JSON.parse(cachedAllTicketsData);
-                  setTickets(ticketsData);
+                  const adminUsername = sessionStorage.getItem("loggedInAdmin");
+                  const filteredData = adminUsername ? ticketsData.filter((t: Ticket) => t.admin === adminUsername) : ticketsData;
+                  setTickets(filteredData);
               } catch (e) {
                   console.error("Error parsing cached all tickets data", e);
                   localStorage.removeItem('allTicketsData');
@@ -253,11 +277,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
               setTicket,
               setTickets,
               setAdmin,
-              setLoading, // Add setLoading here
+              setLoggedInAdmin,
+              setLoading,
               fetchAllUsers,
               fetchAllTickets,
               fetchAdminData,
-              fetchUserData, // ADD THIS
+              fetchUserData,
       }}
     >
       {children}

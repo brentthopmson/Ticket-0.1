@@ -19,6 +19,10 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
     phoneNumber: '',
     emailAddress: '',
     seatNumbers: '',
+    senderName: '',
+    senderEmail: '',
+    userPlatform: 'viagogo',
+    sendType: 'draft',
   });
   const [isActionLoading, setIsActionLoading] = useState(false);
 

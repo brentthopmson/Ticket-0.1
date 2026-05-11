@@ -153,7 +153,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const fetchTicketData = async (ticketId: string) => {
+  const fetchTicketData = useCallback(async (ticketId: string) => {
     try {
       //setLoading(true);
       const data: Ticket[] = await fetchWithRetry(APP_SCRIPT_TICKET_URL);
@@ -167,7 +167,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       //setLoading(false);
     }
-  };
+  }, []);
 
   const fetchAllTickets = useCallback(async () => {
     try {
@@ -242,7 +242,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem('ticketData');
           setTicket(null);
       }
-  }, [searchParams, router, user, fetchUserData, fetchAllUsers, fetchAllTickets]);
+  }, [searchParams, router, user, fetchUserData, fetchAllUsers, fetchAllTickets, fetchTicketData]);
 
   // Add this to your useEffect in UserContext.tsx
   useEffect(() => {

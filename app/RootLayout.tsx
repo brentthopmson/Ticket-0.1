@@ -90,7 +90,7 @@ export default function RootLayout({
                   {/* Logo */}
                   <Link href="/" className="flex items-center">
                     <Image 
-                      src="https://www.ticketmaster.ae/feature/app/images/app-t.png" 
+                      src="https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png" 
                       alt="Ticketmaster" 
                       width={40} 
                       height={40} 

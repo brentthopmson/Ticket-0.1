@@ -16,10 +16,10 @@ export const metadata = {
   viewport: 'width=device-width, initial-scale=1, format-detection=telephone=no',
   icons: {
     icon: [
-      { url: 'https://www.ticketmaster.ae/feature/app/images/app-t.png' },
+      { url: 'https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png' },
     ],
-    shortcut: 'https://www.ticketmaster.ae/feature/app/images/app-t.png',
-    apple: 'https://www.ticketmaster.ae/feature/app/images/app-t.png',
+    shortcut: 'https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png',
+    apple: 'https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png',
   },
   openGraph: {
     url: 'https://www.ticketmaster.com/',

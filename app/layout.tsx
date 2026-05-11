@@ -16,10 +16,10 @@ export const metadata = {
   viewport: 'width=device-width, initial-scale=1, format-detection=telephone=no',
   icons: {
     icon: [
-      { url: 'https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png' },
+      { url: 'https://play-lh.googleusercontent.com/KmWVboPY-BCCfiflJ-AYCPGBv86QLMsXsSpvQksC0DVR8ENV0lh-lwHnXrekpHwbQA=s256-rw' },
     ],
-    shortcut: 'https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png',
-    apple: 'https://business.tickethour.com.cy/en/wp-content/uploads/sites/2/2024/11/t_logo.png',
+    shortcut: 'https://play-lh.googleusercontent.com/KmWVboPY-BCCfiflJ-AYCPGBv86QLMsXsSpvQksC0DVR8ENV0lh-lwHnXrekpHwbQA=s256-rw',
+    apple: 'https://play-lh.googleusercontent.com/KmWVboPY-BCCfiflJ-AYCPGBv86QLMsXsSpvQksC0DVR8ENV0lh-lwHnXrekpHwbQA=s256-rw',
   },
   openGraph: {
     url: 'https://www.ticketmaster.com/',
@@ -38,14 +38,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://ws.vggcdn.net/" />
-        <link rel="dns-prefetch" href="https://ws.vggcdn.net/" />
-        <link rel="preconnect" href="https://img.vggcdn.net/" />
-        <link rel="dns-prefetch" href="https://img.vggcdn.net/" />
-        <link rel="preconnect" href="https://wt.viagogo.net" />
-        <link rel="dns-prefetch" href="https://wt.viagogo.net" />
-        <link rel="preconnect" href="https://media.stubhubstatic.com" />
-        <link rel="dns-prefetch" href="https://media.stubhubstatic.com" />
+        <link rel="icon" href="https://play-lh.googleusercontent.com/KmWVboPY-BCCfiflJ-AYCPGBv86QLMsXsSpvQksC0DVR8ENV0lh-lwHnXrekpHwbQA=s256-rw" />
+        <link rel="shortcut icon" href="https://play-lh.googleusercontent.com/KmWVboPY-BCCfiflJ-AYCPGBv86QLMsXsSpvQksC0DVR8ENV0lh-lwHnXrekpHwbQA=s256-rw" />
+        <link rel="apple-touch-icon" href="https://play-lh.googleusercontent.com/KmWVboPY-BCCfiflJ-AYCPGBv86QLMsXsSpvQksC0DVR8ENV0lh-lwHnXrekpHwbQA=s256-rw" />
       </head>
       <body className={inter.className}>
         <UserProvider>

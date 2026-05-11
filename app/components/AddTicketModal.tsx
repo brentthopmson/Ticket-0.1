@@ -20,7 +20,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
     sectionNo: '',
     row: '',
     seatNumbers: '',
-    platform: 'viagogo',
+    platform: 'ticketmaster',
     ageRestriction: 'All Ages',
     coverImage: '',
     description: '',
@@ -87,7 +87,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
           <h2 className="text-2xl font-black text-[#001B41]">Add New Ticket</h2>
           <button 
@@ -107,7 +107,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="eventName"
                 value={formData.eventName}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -119,7 +119,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="venue"
                 value={formData.venue}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -131,7 +131,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -143,7 +143,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="dateTime"
                 value={formData.dateTime}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -156,7 +156,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 value={formData.doorTime}
                 onChange={handleChange}
                 placeholder="e.g. 6:30 PM"
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               />
             </div>
             
@@ -166,7 +166,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="section"
                 value={formData.section}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               >
                 <option value="">Select a section</option>
@@ -184,7 +184,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="sectionNo"
                 value={formData.sectionNo}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               />
             </div>
             
@@ -195,7 +195,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="row"
                 value={formData.row}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -208,7 +208,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 placeholder="e.g. 101, 102"
                 value={formData.seatNumbers}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -216,7 +216,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             <div>
               <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Platforms*</label>
               <div className="flex flex-wrap gap-2">
-                {['viagogo', 'ticketmaster', 'uefa'].map((p) => {
+                {['ticketmaster', 'viagogo', 'uefa'].map((p) => {
                   const isSelected = formData.platform.split(',').includes(p);
                   return (
                     <button
@@ -225,7 +225,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                       onClick={() => togglePlatform(p)}
                       className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border-2 ${
                         isSelected 
-                          ? 'bg-[#89CF28] border-[#89CF28] text-white shadow-md shadow-[#89CF28]/20' 
+                          ? 'bg-[#026CDF] border-[#026CDF] text-white shadow-md shadow-[#026CDF]/20' 
                           : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
                       }`}
                     >
@@ -242,7 +242,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 name="ageRestriction"
                 value={formData.ageRestriction}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               >
                 <option value="All Ages">All Ages</option>
                 <option value="18+">18+</option>
@@ -259,7 +259,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
               value={formData.coverImage}
               onChange={handleChange}
               placeholder="https://example.com/image.jpg"
-              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
             />
           </div>
 
@@ -270,7 +270,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
             ></textarea>
           </div>
 
@@ -281,11 +281,10 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
               value={formData.terms}
               onChange={handleChange}
               rows={2}
-              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+              className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
             ></textarea>
           </div>
           
-          {/* Error Message is now just before the buttons */}
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
@@ -303,7 +302,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-[#89CF28] text-white rounded-xl font-black shadow-lg shadow-[#89CF28]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center"
+              className="px-8 py-3 bg-[#026CDF] text-white rounded-xl font-black shadow-lg shadow-[#026CDF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center"
               disabled={loading}
             >
               {loading ? (

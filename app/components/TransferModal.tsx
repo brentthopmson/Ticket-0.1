@@ -38,7 +38,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
         phoneNumber: '',
         seatNumbers: '',
         sendType: 'draft',
-        userPlatform: 'viagogo'
+        userPlatform: 'ticketmaster'
     });
 
     useEffect(() => {
@@ -95,7 +95,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
             payload.append('seatNumbers', formData.seatNumbers);
             payload.append('ticketId', ticket.ticketId);
             payload.append('admin', admin.username);
-            payload.append('senderName', admin.senderName || 'Viagogo');
+            payload.append('senderName', admin.senderName || 'Ticketmaster');
             payload.append('senderEmail', admin.senderEmail || '');
             payload.append('userPlatform', formData.userPlatform);
             payload.append('sendType', formData.sendType);
@@ -154,9 +154,9 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                         <div className="space-y-4">
                             <button 
                                 onClick={() => setView('contacts')}
-                                className="w-full p-6 rounded-2xl border-2 border-gray-100 hover:border-[#89CF28] hover:bg-[#89CF28]/5 transition-all text-left flex items-center group"
+                                className="w-full p-6 rounded-2xl border-2 border-gray-100 hover:border-[#026CDF] hover:bg-[#026CDF]/5 transition-all text-left flex items-center group"
                             >
-                                <div className="w-12 h-12 rounded-full bg-[#89CF28]/10 text-[#89CF28] flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                                <div className="w-12 h-12 rounded-full bg-[#026CDF]/10 text-[#026CDF] flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                                     <FontAwesomeIcon icon={faUserPlus} />
                                 </div>
                                 <div className="flex-1">
@@ -189,7 +189,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                                 <input 
                                     type="text" 
                                     placeholder="Search contacts..."
-                                    className="w-full p-4 pl-12 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#89CF28]"
+                                    className="w-full p-4 pl-12 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#026CDF]"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -271,7 +271,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                         <div className="space-y-6">
                             <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
                                 <div className="flex items-center mb-6">
-                                    <div className="w-12 h-12 rounded-full bg-[#89CF28]/10 text-[#89CF28] flex items-center justify-center mr-4">
+                                    <div className="w-12 h-12 rounded-full bg-[#026CDF]/10 text-[#026CDF] flex items-center justify-center mr-4">
                                         <FontAwesomeIcon icon={faPaperPlane} />
                                     </div>
                                     <div>
@@ -290,7 +290,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                                     </div>
                                     <div className="flex justify-between items-center py-2">
                                         <span className="text-xs font-bold text-gray-400">Seats</span>
-                                        <span className="text-xs font-black text-[#89CF28]">{formData.seatNumbers}</span>
+                                        <span className="text-xs font-black text-[#026CDF]">{formData.seatNumbers}</span>
                                     </div>
                                 </div>
                             </div>
@@ -299,7 +299,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                                     <label className="text-xs font-black text-[#001B41]">Transfer Mode</label>
                                     <select 
-                                        className="bg-transparent font-black text-xs text-[#89CF28] outline-none"
+                                        className="bg-transparent font-black text-xs text-[#026CDF] outline-none"
                                         value={formData.sendType}
                                         onChange={(e) => setFormData({...formData, sendType: e.target.value})}
                                     >
@@ -313,7 +313,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                                 <button 
                                     onClick={handleTransfer}
                                     disabled={loading}
-                                    className="w-full bg-[#89CF28] text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-[#89CF28]/20 flex items-center justify-center hover:scale-[1.02] transition-transform disabled:opacity-50"
+                                    className="w-full bg-[#026CDF] text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-[#026CDF]/20 flex items-center justify-center hover:scale-[1.02] transition-transform disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -328,7 +328,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                     {/* View: Success */}
                     {view === 'success' && (
                         <div className="py-12 text-center">
-                            <div className="w-20 h-20 bg-[#89CF28]/10 text-[#89CF28] rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                            <div className="w-20 h-20 bg-[#026CDF]/10 text-[#026CDF] rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
                                 <FontAwesomeIcon icon={faCheckCircle} className="text-4xl" />
                             </div>
                             <h3 className="text-2xl font-black text-[#001B41] mb-2">Transfer Initiated!</h3>
@@ -351,7 +351,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                 {view !== 'success' && (
                     <div className="p-6 bg-gray-50 border-t border-gray-100">
                         <p className="text-[10px] text-gray-400 font-bold text-center leading-relaxed">
-                            By continuing, you agree to the Viagogo Ticket Transfer Terms. 
+                            By continuing, you agree to the Ticketmaster Ticket Transfer Terms. 
                             Transferred tickets cannot be retracted once accepted by the recipient.
                         </p>
                     </div>

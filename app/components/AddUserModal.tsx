@@ -50,9 +50,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     if (admin) {
       setFormData(prev => ({
         ...prev,
-        senderName: prev.senderName || admin.senderName || '',
+        senderName: prev.senderName || admin.senderName || 'Ticketmaster',
         senderEmail: prev.senderEmail || admin.senderEmail || '',
-        userPlatform: prev.userPlatform || 'viagogo',
+        userPlatform: prev.userPlatform || 'ticketmaster',
         sendType: prev.sendType || 'draft'
       }));
     }
@@ -84,8 +84,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       return;
     }
 
-    // Determine which Apps Script URL to use based on platform
-    // Using the environment variable for the specific deployment URL
     const POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbwXIfuadHykMFrMdPPLLP7y0pm4oZ8TJUnM9SMmDp9BkaVLGu9jupU-CuW8Id-Mm1ylxg/exec";
 
     setLoading(true);
@@ -105,9 +103,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       payload.append('senderName', formData.senderName);
       payload.append('senderEmail', formData.senderEmail);
       payload.append('userPlatform', formData.userPlatform);
-      payload.append('sendType', formData.sendType); // New field: draft or auto
-
-      console.log('Payload:', payload.toString());
+      payload.append('sendType', formData.sendType);
 
       const response = await fetch(POST_URL, {
         method: 'POST',
@@ -122,11 +118,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       }
 
       const data = await response.json();
-
-      console.log('Response:', data);
       
-      fetchAllUsers(); 
-
       if (data.error) {
         setError(data.error);
       } else {
@@ -148,7 +140,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
           <h2 className="text-2xl font-black text-[#001B41]">Transfer Ticket</h2>
           <button
@@ -168,7 +160,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -180,7 +172,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -192,7 +184,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="emailAddress"
                 value={formData.emailAddress}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -202,7 +194,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               <select
                 value={selectedTicketId}
                 onChange={e => setSelectedTicketId(e.target.value)}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               >
                 <option value="">--Select a Ticket--</option>
@@ -221,7 +213,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="seatNumbers"
                 value={formData.seatNumbers}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -233,7 +225,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="senderName"
                 value={formData.senderName}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -245,7 +237,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="senderEmail"
                 value={formData.senderEmail}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               />
             </div>
@@ -256,11 +248,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="userPlatform"
                 value={formData.userPlatform}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               >
-                <option value="viagogo">Viagogo</option>
                 <option value="ticketmaster">Ticketmaster</option>
+                <option value="viagogo">Viagogo</option>
                 <option value="uefa">UEFA</option>
               </select>
             </div>
@@ -271,7 +263,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="sendType"
                 value={formData.sendType}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                 required
               >
                 <option value="draft">Save as Draft</option>
@@ -297,7 +289,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-[#89CF28] text-white rounded-xl font-black shadow-lg shadow-[#89CF28]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center"
+              className="px-8 py-3 bg-[#026CDF] text-white rounded-xl font-black shadow-lg shadow-[#026CDF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center"
               disabled={loading}
             >
               {loading ? (

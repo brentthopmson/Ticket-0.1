@@ -49,7 +49,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
                                 </div>
                             </div>
                             <div className="hidden md:block">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#89CF28]/10 text-[#89CF28] uppercase tracking-wider">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#026CDF]/10 text-[#026CDF] uppercase tracking-wider">
                                     {ticket.ticketStatus || 'Confirmed'}
                                 </span>
                             </div>
@@ -59,7 +59,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
                             <div className="text-sm text-gray-500">
                                 <span className="font-bold">Sec {ticket.section}</span>, Row {ticket.row}
                             </div>
-                            <div className="text-[#89CF28] font-bold flex items-center hover:underline">
+                            <div className="text-[#026CDF] font-bold flex items-center hover:underline">
                                 View Ticket <FontAwesomeIcon icon={faChevronRight} className="ml-2 text-xs" />
                             </div>
                         </div>

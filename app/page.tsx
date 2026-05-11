@@ -17,7 +17,7 @@ export default function Home() {
             <input 
               type="text" 
               placeholder="Search for artists, venues, or events" 
-              className="w-full py-3 pl-10 pr-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full py-3 pl-10 pr-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#026CDF]"
             />
             <svg className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1116.65 2a7.5 7.5 0 010 15z" />
@@ -35,8 +35,8 @@ export default function Home() {
                 <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" alt="Concerts" className="w-full h-48 object-cover" />
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Upcoming Concerts</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">Experience live music from your favorite artists.</p>
-                  <button className="text-blue-600 dark:text-blue-400 font-bold hover:underline">Learn More</button>
+                  <p className="text-gray-600 mb-4">Experience live music from your favorite artists.</p>
+                  <button className="text-[#026CDF] font-bold hover:underline">Learn More</button>
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-100">
@@ -89,8 +89,8 @@ export default function Home() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden group">
                 <img src="https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&q=80&w=400" alt="Family" className="w-full h-48 object-cover transition-transform group-hover:scale-105" />
                 <div className="p-4">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Family</h3>
-                  <button className="text-blue-600 dark:text-blue-400 text-sm hover:underline">Explore Family</button>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Family</h3>
+                  <button className="text-[#026CDF] text-sm hover:underline">Explore Family</button>
                 </div>
               </div>
             </div>

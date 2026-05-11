@@ -21,12 +21,11 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
     seatNumbers: '',
     senderName: '',
     senderEmail: '',
-    userPlatform: 'viagogo',
+    userPlatform: 'ticketmaster',
     sendType: 'draft',
   });
   const [isActionLoading, setIsActionLoading] = useState(false);
 
-  // Define the APP_SCRIPT_POST_URL here
   const APP_SCRIPT_POST_URL = "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,9 +69,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
 
   return (
     <>
-      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <section className="bg-white p-6 rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Users</h2>
+          <h2 className="text-xl font-bold text-gray-900">Users</h2>
           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
             <div className="w-full sm:w-64">
               <input
@@ -80,12 +79,12 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-2 border border-gray-300 rounded-lg"
               />
             </div>
             <button
               onClick={handleAddUser}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center"
+              className="bg-[#026CDF] hover:bg-[#026CDF]/90 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center font-bold"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Send Ticket
@@ -95,7 +94,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="border p-2 text-sm text-left">Full Name</th>
                 <th className="border p-2 text-sm text-left hidden lg:table-cell">Phone Number</th>
@@ -108,7 +107,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
             </thead>
             <tbody>
               {filteredUsers.reverse().map(user => (
-                <tr key={user.userId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr key={user.userId} className="hover:bg-gray-50">
                   <td className="border p-2 text-sm">{user.fullName}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.phoneNumber}</td>
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.emailAddress}</td>
@@ -116,7 +115,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                   <td className="border p-2 text-sm hidden lg:table-cell">{user.section}</td>
                   <td className="border p-2 text-sm">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs ${
+                      className={`px-2 py-1 rounded-full text-xs font-bold ${
                         user.systemStatus === 'ACTIVE'
                           ? 'bg-green-100 text-green-800'
                           : user.systemStatus === 'WAITING CHECK'
@@ -147,7 +146,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
                           className="text-red-600 hover:text-red-800"
                           title="Retract Transfer"
                         >
-                          {isActionLoading ? <span className="animate-spin">Loading...</span> : <FontAwesomeIcon icon={faTimesCircle} />}
+                          {isActionLoading ? <span className="animate-spin text-xs">...</span> : <FontAwesomeIcon icon={faTimesCircle} />}
                         </button>
                       )}
                     </div>
@@ -159,7 +158,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
         </div>
 
         {filteredUsers.length === 0 && (
-          <div className="text-center py-4 text-gray-500">
+          <div className="text-center py-4 text-gray-500 font-bold">
             No users found matching your search criteria.
           </div>
         )}
@@ -170,7 +169,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
           tickets={tickets}
           formData={newUserFormData}
           setFormData={setNewUserFormData}
-          onAddUser={handleAddUser}
+          onAddUser={fetchAllUsers}
           onClose={() => setShowAddUserModal(false)}
         />
       )}

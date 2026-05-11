@@ -9,7 +9,7 @@ import UpdateTicketModal from './UpdateTicketModal';
 interface TicketTableProps {
   tickets: Ticket[];
   users: User[];
-  onTicketsChange?: () => void; // Callback to refresh tickets after changes
+  onTicketsChange?: () => void;
 }
 
 const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChange }) => {
@@ -48,7 +48,6 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
       
       if (response.ok) {
         alert("Ticket deleted successfully!");
-        // Refresh the tickets list
         if (onTicketsChange) {
           onTicketsChange();
         }
@@ -84,9 +83,9 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
 
   return (
     <>
-      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <section className="bg-white p-6 rounded-lg shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Tickets</h2>
+          <h2 className="text-xl font-bold text-gray-900">Tickets</h2>
           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
             <div className="w-full sm:w-64">
               <input
@@ -94,12 +93,12 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
                 placeholder="Search tickets..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+                className="w-full p-2 border border-gray-300 rounded-lg"
               />
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center"
+              className="bg-[#026CDF] hover:bg-[#026CDF]/90 text-white px-4 py-2 rounded-md flex items-center w-full sm:w-auto justify-center font-bold"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Add Ticket
@@ -109,7 +108,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
         
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="border p-2 text-sm text-left">Event Name</th>
                 <th className="border p-2 text-sm text-left">Venue</th>
@@ -121,7 +120,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
             </thead>
             <tbody>
               {filteredTickets.map(ticket => (
-                <tr key={ticket.ticketId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr key={ticket.ticketId} className="hover:bg-gray-50">
                   <td className="border p-2 text-sm">{ticket.eventName}</td>
                   <td className="border p-2 text-sm">{ticket.venue}</td>
                   <td className="border p-2 text-sm hidden md:table-cell">
@@ -133,7 +132,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
                     <div className="flex items-center justify-center space-x-3">
                       <button
                         onClick={() => handleUpdateTicket(ticket)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-[#026CDF] hover:opacity-70"
                         title="Update Ticket"
                         disabled={isDeleting === ticket.ticketId}
                       >
@@ -160,18 +159,16 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
         </div>
         
         {filteredTickets.length === 0 && (
-          <div className="text-center py-4 text-gray-500">
+          <div className="text-center py-4 text-gray-500 font-bold">
             No tickets found matching your search criteria.
           </div>
         )}
       </section>
 
-      {/* Add Ticket Modal */}
       {showAddModal && (
         <AddTicketModal onClose={handleAddTicketClose} />
       )}
 
-      {/* Update Ticket Modal */}
       {showUpdateModal && selectedTicket && (
         <UpdateTicketModal 
           ticket={selectedTicket} 

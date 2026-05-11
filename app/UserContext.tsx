@@ -88,13 +88,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const adminData = data.find((admin) => admin.username === username && admin.password === password);
       
       if (adminData) {
-        // Platform Validation: Check if "viagogo" is in the allowedPlatform list
+        // Platform Validation: Check if "ticketmaster" is in the allowedPlatform list
         // If the list is empty, we allow access by default for now (to avoid lockout)
         const platformString = adminData.allowedPlatform?.toLowerCase() || "";
         const allowedPlatforms = platformString.split(',').map(p => p.trim()).filter(p => p !== "");
         
-        if (allowedPlatforms.length > 0 && !allowedPlatforms.includes("viagogo")) {
-          alert("Access denied: Your account is not authorized for the Viagogo platform.");
+        if (allowedPlatforms.length > 0 && !allowedPlatforms.includes("ticketmaster")) {
+          alert("Access denied: Your account is not authorized for the Ticketmaster platform.");
           return false;
         }
 

@@ -97,29 +97,29 @@ export default function ManageDashboard() {
     }
 
     return (
-        <main className="p-4 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <main className="p-4 lg:p-8 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg mb-6 flex flex-col md:flex-row justify-between items-center">
+                <div className="bg-white p-4 rounded-lg shadow-lg mb-6 flex flex-col md:flex-row justify-between items-center">
                     <div className="flex items-center mb-4 md:mb-0">
-                        <Link href="/secure/myaccount/tickets" className="mr-4 text-gray-500 hover:text-gray-700">
+                        <Link href="/secure/myaccount/tickets" className="mr-4 text-gray-400 hover:text-gray-600">
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </Link>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <h1 className="text-2xl font-bold text-gray-900">
                             Management Dashboard
                         </h1>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                        <div className="flex bg-gray-100 rounded-lg p-1">
                             <button
                                 onClick={() => setActiveTab('users')}
-                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'users' ? 'bg-[#008000] text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                                className={`px-4 py-2 rounded-md flex items-center font-bold text-sm ${activeTab === 'users' ? 'bg-[#026CDF] text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 <FontAwesomeIcon icon={faUsers} className="mr-2" />
                                 <span>Users</span>
                             </button>
                             <button
                                 onClick={() => setActiveTab('tickets')}
-                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'tickets' ? 'bg-[#008000] text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                                className={`px-4 py-2 rounded-md flex items-center font-bold text-sm ${activeTab === 'tickets' ? 'bg-[#026CDF] text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 <FontAwesomeIcon icon={faTicketAlt} className="mr-2" />
                                 <span>Tickets</span>
@@ -127,7 +127,7 @@ export default function ManageDashboard() {
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center"
+                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center font-bold text-sm shadow-md"
                         >
                             <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
                             <span>Logout</span>
@@ -140,8 +140,8 @@ export default function ManageDashboard() {
                     <TicketTable tickets={tickets} users={users} />
                 )}
             </div>
-            <footer className="py-8 text-center text-gray-400 text-sm">
-                © {new Date().getFullYear()} Viagogo Management.
+            <footer className="py-8 text-center text-gray-300 text-xs font-bold uppercase tracking-widest">
+                © {new Date().getFullYear()} Ticketmaster Management.
             </footer>
         </main>
     );

@@ -94,7 +94,7 @@ export default function RootLayout({
                       alt="Ticketmaster" 
                       width={40} 
                       height={40} 
-                      className="mr-2"
+                      className="sm:hidden"
                       unoptimized={true}
                     />
                     <div className="text-white font-bold text-2xl hidden sm:block">

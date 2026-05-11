@@ -10,28 +10,22 @@ config.autoAddCss = false;
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Tickets - Concert, Sport & Theatre Tickets | viagogo the Ticket Marketplace',
-  description: 'Tickets for Concerts, Sport, Theatre at viagogo, an online ticket marketplace. Buy and Sell Tickets.',
-  keywords: 'viagogo, buy tickets, sell tickets, concert, sport, theater',
+  title: 'Tickets - Buy and Sell Concert, Sports & Theatre Tickets | Ticketmaster',
+  description: 'Search and buy tickets for your favorite artists, teams, and shows at Ticketmaster.',
+  keywords: 'ticketmaster, buy tickets, sell tickets, concert, sport, theater',
   viewport: 'width=device-width, initial-scale=1, format-detection=telephone=no',
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon.png', type: 'image/png' },
+      { url: 'https://www.ticketmaster.ae/feature/app/images/app-t.png' },
     ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.png',
+    shortcut: 'https://www.ticketmaster.ae/feature/app/images/app-t.png',
+    apple: 'https://www.ticketmaster.ae/feature/app/images/app-t.png',
   },
   openGraph: {
-    url: 'https://www.viagogo.com/',
-    title: 'Tickets - Concert, Sport & Theatre Tickets | viagogo the Ticket Marketplace',
-    description: 'Tickets for Concerts, Sport, Theatre at viagogo, an online ticket marketplace. Buy and Sell Tickets.',
-    siteName: 'viagogo.com',
-    images: [
-      {
-        url: '/logo.png',
-      },
-    ],
+    url: 'https://www.ticketmaster.com/',
+    title: 'Tickets - Buy and Sell Concert, Sports & Theatre Tickets | Ticketmaster',
+    description: 'Search and buy tickets for your favorite artists, teams, and shows at Ticketmaster.',
+    siteName: 'ticketmaster.com',
     type: 'website',
   },
 };

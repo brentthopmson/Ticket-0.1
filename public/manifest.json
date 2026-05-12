@@ -2,7 +2,7 @@
   "name": "Ticketmaster",
   "short_name": "Ticketmaster",
   "description": "Buy and sell concert, sports and theatre tickets",
-  "start_url": "/",
+  "start_url": "/login",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

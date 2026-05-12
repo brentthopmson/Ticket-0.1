@@ -28,7 +28,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
         setErrorMessage(null);
 
         if (!username || !password) {
-            setErrorMessage("Please enter both email and password.");
+            setErrorMessage("Please enter both email/username and password.");
             return;
         }
 
@@ -40,7 +40,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
                 setLoggedInAdmin(username);
                 router.push('/secure/myaccount/tickets');
             } else {
-                setErrorMessage("Invalid email or password. Please try again.");
+                setErrorMessage("Invalid email, username, or password. Please try again.");
                 setPassword("");
             }
         } catch (error) {
@@ -100,10 +100,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
 
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[14px] font-semibold text-[#1F262D]">Email Address</label>
+                                <label className="text-[14px] font-semibold text-[#1F262D]">Email or Username</label>
                                 <input
-                                    type="email"
-                                    placeholder="Enter your email"
+                                    type="text"
+                                    placeholder="Enter your email or username"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:border-[#026CDF] focus:ring-1 focus:ring-[#026CDF] outline-none transition-all text-[16px]"

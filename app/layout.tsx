@@ -13,6 +13,7 @@ export const metadata = {
   title: 'Tickets - Buy and Sell Concert, Sports & Theatre Tickets | Ticketmaster',
   description: 'Search and buy tickets for your favorite artists, teams, and shows at Ticketmaster.',
   keywords: 'ticketmaster, buy tickets, sell tickets, concert, sport, theater',
+  manifest: '/manifest.json',
   viewport: 'width=device-width, initial-scale=1, format-detection=telephone=no',
   icons: {
     icon: [
@@ -38,6 +39,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="theme-color" content="#026CDF" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Ticketmaster" />
+        <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
         <link rel="shortcut icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
         <link rel="apple-touch-icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />

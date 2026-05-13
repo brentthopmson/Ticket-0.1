@@ -28,7 +28,7 @@ export default function ManageDashboard() {
     const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
     const [users, setFilteredUsers] = useState<User[]>([]);
     const [tickets, setFilteredTickets] = useState<Ticket[]>([]);
-    const [activeTab, setActiveTab] = useState<'users' | 'tickets'>('users');
+    const [activeTab, setActiveTab] = useState<'transfers' | 'tickets'>('transfers');
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
 
     useEffect(() => {
@@ -109,13 +109,13 @@ export default function ManageDashboard() {
                         </h1>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <div className="flex bg-gray-100 rounded-lg p-1">
+                        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                             <button
-                                onClick={() => setActiveTab('users')}
-                                className={`px-4 py-2 rounded-md flex items-center font-bold text-sm ${activeTab === 'users' ? 'bg-[#026CDF] text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setActiveTab('transfers')}
+                                className={`px-4 py-2 rounded-md flex items-center ${activeTab === 'transfers' ? 'bg-[#026cdf] text-white' : 'text-gray-700 dark:text-gray-300'}`}
                             >
                                 <FontAwesomeIcon icon={faUsers} className="mr-2" />
-                                <span>Users</span>
+                                <span>Transfers</span>
                             </button>
                             <button
                                 onClick={() => setActiveTab('tickets')}
@@ -134,7 +134,7 @@ export default function ManageDashboard() {
                         </button>
                     </div>
                 </div>
-                {activeTab === 'users' ? (
+                {activeTab === 'transfers' ? (
                     <UserTable users={users} tickets={tickets} />
                 ) : (
                     <TicketTable tickets={tickets} users={users} />

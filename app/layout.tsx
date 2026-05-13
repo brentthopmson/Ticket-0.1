@@ -41,7 +41,7 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#026CDF" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Ticketmaster" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />

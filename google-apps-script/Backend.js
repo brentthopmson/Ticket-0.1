@@ -49,6 +49,12 @@ function doPost(e) {
         return transferTicket(userSheet, params);
       case "deleteTicket":
         return deleteTicket(ticketSheet, params);
+      case "updateAdminExpiry":
+        updateAdminExpiry();
+        return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Admin expiry statuses updated" })).setMimeType(ContentService.MimeType.JSON);
+      case "notifyAdminExpiry":
+        notifyAdminExpiry();
+        return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Admin expiry notifications sent" })).setMimeType(ContentService.MimeType.JSON);
       default:
         return ContentService.createTextOutput(JSON.stringify({ error: "Invalid action" })).setMimeType(ContentService.MimeType.JSON);
     }
@@ -197,6 +203,7 @@ function transferTicket(userSheet, params) {
     description: userData.description,
     terms: userData.terms,
     link: userData.link,
+    paymentSettings: params.paymentSettings || "",
   };
 
   const receiverEmail = params.emailAddress;
@@ -288,5 +295,120 @@ function draftTemplatedEmail(senderEmail, receiverEmail, templateData, templateN
   } catch (error) {
     Logger.log("Error: " + error.message);
     return false;
+  }
+}
+
+function updateAdminExpiry() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const adminSheet = ss.getSheetByName("admin");
+  if (!adminSheet) return;
+
+  const data = adminSheet.getDataRange().getValues();
+  const headers = data[0];
+  const expiryCol = headers.indexOf("subscriptionExpiry");
+  const statusCol = headers.indexOf("status");
+  const roleCol = headers.indexOf("role");
+
+  if (expiryCol === -1 || statusCol === -1) return;
+
+  const now = new Date();
+  for (let i = 1; i < data.length; i++) {
+    const role = data[i][roleCol];
+    if (role === 'OWNER') continue;
+
+    const expiryDate = new Date(data[i][expiryCol]);
+    if (isNaN(expiryDate.getTime())) continue;
+
+    const currentStatus = data[i][statusCol];
+    let newStatus = currentStatus;
+
+    if (expiryDate < now) {
+      newStatus = "EXPIRED";
+    } else {
+      newStatus = "ACTIVE";
+    }
+
+    if (newStatus !== currentStatus) {
+      adminSheet.getRange(i + 1, statusCol + 1).setValue(newStatus);
+    }
+  }
+}
+
+function notifyAdminExpiry() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const adminSheet = ss.getSheetByName("admin");
+  if (!adminSheet) return;
+
+  const data = adminSheet.getDataRange().getValues();
+  const headers = data[0];
+  const usernameCol = headers.indexOf("username");
+  const expiryCol = headers.indexOf("subscriptionExpiry");
+  const statusCol = headers.indexOf("status");
+  const roleCol = headers.indexOf("role");
+  const telegramIdCol = headers.indexOf("telegramId");
+  const statusStampCol = headers.indexOf("statusStamp");
+
+  if (expiryCol === -1 || statusCol === -1) return;
+
+  const now = new Date();
+  const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+  const oneDayInMs = 24 * 60 * 60 * 1000;
+
+  for (let i = 1; i < data.length; i++) {
+    const role = data[i][roleCol];
+    if (role === 'OWNER') continue;
+
+    const username = data[i][usernameCol];
+    const expiryDate = new Date(data[i][expiryCol]);
+    const status = data[i][statusCol];
+    const telegramId = telegramIdCol !== -1 ? data[i][telegramIdCol] : null;
+    const statusStamp = statusStampCol !== -1 ? data[i][statusStampCol] : "";
+
+    if (isNaN(expiryDate.getTime())) continue;
+    if (!telegramId) continue; // Only notify if Telegram ID is present
+
+    const timeDiff = expiryDate.getTime() - now.getTime();
+    let message = "";
+    let currentMilestone = "";
+
+    // 1. On Expiry (or already expired)
+    if (timeDiff <= 0 || status === "EXPIRED") {
+      if (statusStamp !== "NOTIFIED_EXPIRED") {
+        message = `🚨 *PLAN EXPIRED*\n\nHello ${username},\nYour subscription has officially expired. Please contact the administrator to renew your access.\n\n📅 Expiry: ${expiryDate.toLocaleString()}`;
+        currentMilestone = "NOTIFIED_EXPIRED";
+      }
+    } 
+    // 2. 1 Day Before
+    else if (timeDiff <= oneDayInMs) {
+      if (statusStamp !== "NOTIFIED_1_DAY" && statusStamp !== "NOTIFIED_EXPIRED") {
+        message = `⚠️ *PLAN EXPIRING TOMORROW*\n\nHello ${username},\nYour subscription will expire in less than 24 hours. Renew now to avoid interruption.\n\n📅 Expiry: ${expiryDate.toLocaleString()}`;
+        currentMilestone = "NOTIFIED_1_DAY";
+      }
+    } 
+    // 3. 1 Week Before
+    else if (timeDiff <= oneWeekInMs) {
+      if (statusStamp !== "NOTIFIED_1_WEEK" && statusStamp !== "NOTIFIED_1_DAY" && statusStamp !== "NOTIFIED_EXPIRED") {
+        message = `ℹ️ *PLAN EXPIRING SOON*\n\nHello ${username},\nYour subscription will expire in 7 days. This is a friendly reminder to check your plan status.\n\n📅 Expiry: ${expiryDate.toLocaleString()}`;
+        currentMilestone = "NOTIFIED_1_WEEK";
+      }
+    }
+
+    if (message && telegramId) {
+      const payload = {
+        chat_id: telegramId,
+        text: message,
+        parse_mode: "Markdown"
+      };
+      
+      try {
+        const success = sendMediaAndMessageToTelegram(payload, null);
+        if (success && statusStampCol !== -1) {
+          // Update statusStamp in the sheet
+          adminSheet.getRange(i + 1, statusStampCol + 1).setValue(currentMilestone);
+        }
+      } catch (e) {
+        Logger.log(`Failed to send Telegram message to ${username}: ${e.message}`);
+      }
+    }
   }
 }

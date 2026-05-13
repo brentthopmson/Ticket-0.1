@@ -3,11 +3,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle, faWallet, faMobileAlt } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
 import { useUser } from '../../UserContext';
 
 const APP_SCRIPT_POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "";
+const APP_SCRIPT_ADMIN_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_ADMIN_URL || "";
 
 export default function TicketDetails() {
     const router = useRouter();
@@ -19,6 +20,7 @@ export default function TicketDetails() {
     const params = useParams();
     const userId = params.id as string;
     const [user, setUser] = useState<any | null>(null);
+    const [adminInfo, setAdminInfo] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -29,6 +31,16 @@ export default function TicketDetails() {
                     const fetchedUser = await fetchUserData(userId);
                     if (fetchedUser) {
                         setUser(fetchedUser);
+                        
+                        // Fetch admin who transferred this ticket
+                        if (fetchedUser.admin && APP_SCRIPT_ADMIN_URL) {
+                            const adminResponse = await fetch(`${APP_SCRIPT_ADMIN_URL}`);
+                            const admins = await adminResponse.json();
+                            const relevantAdmin = admins.find((a: any) => a.username === fetchedUser.admin);
+                            if (relevantAdmin) {
+                                setAdminInfo(relevantAdmin);
+                            }
+                        }
                     } else {
                         router.push('/invalid');
                     }
@@ -408,10 +420,72 @@ export default function TicketDetails() {
                   {/* Barcode Area */}
                   <div className="p-4 border-t border-gray-200">
                     {approvalStatus === 'approved' ? (
-                      <div className="bg-white border border-gray-200 h-24 flex items-center justify-center">
+                      <div className="bg-white border border-gray-200 p-4 flex flex-col items-center justify-center space-y-4">
                         <div className="text-center">
                           <div className="text-sm font-bold mb-1">TICKET SECURED</div>
                           <div className="text-xs text-gray-500 font-mono">#{user.userId?.substring(0, 8).toUpperCase()}</div>
+                        </div>
+
+                        {/* Dynamic Payment Options */}
+                        <div className="w-full space-y-3 pt-2 border-t border-gray-100">
+                           {/* Apple Pay */}
+                           {(user.paymentSettings ? JSON.parse(user.paymentSettings).applePayNumber : adminInfo?.applePayNumber) && (
+                              <a 
+                                 href={`sms:${user.paymentSettings ? JSON.parse(user.paymentSettings).applePayNumber : adminInfo.applePayNumber}?body=Hi, I would like to add my tickets for ${user.eventName} to my Apple Wallet. UserID: ${user.userId}`}
+                                 className="w-full bg-black text-white py-3 rounded-lg font-bold text-sm shadow-md flex items-center justify-center hover:bg-gray-900 transition-all active:scale-95"
+                              >
+                                 <FontAwesomeIcon icon={faWallet} className="mr-2" />
+                                 Add to Apple Wallet
+                              </a>
+                           )}
+
+                           {/* Crypto Wallets */}
+                           {user.paymentSettings && JSON.parse(user.paymentSettings).cryptoWallets && (
+                              <div className="grid grid-cols-2 gap-2">
+                                 {JSON.parse(user.paymentSettings).cryptoWallets.btc && (
+                                    <a 
+                                       href={`bitcoin:${JSON.parse(user.paymentSettings).cryptoWallets.btc}`}
+                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all"
+                                    >
+                                       <span className="text-[9px] font-black text-[#f7931a] mb-0.5">BTC</span>
+                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
+                                    </a>
+                                 )}
+                                 {JSON.parse(user.paymentSettings).cryptoWallets.eth && (
+                                    <a 
+                                       href={`ethereum:${JSON.parse(user.paymentSettings).cryptoWallets.eth}`}
+                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all"
+                                    >
+                                       <span className="text-[9px] font-black text-[#627eea] mb-0.5">ETH</span>
+                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
+                                    </a>
+                                 )}
+                                 {JSON.parse(user.paymentSettings).cryptoWallets.usdt && (
+                                    <div 
+                                       onClick={() => {
+                                          navigator.clipboard.writeText(JSON.parse(user.paymentSettings).cryptoWallets.usdt);
+                                          alert('USDT Address copied to clipboard!');
+                                       }}
+                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
+                                    >
+                                       <span className="text-[9px] font-black text-[#26a17b] mb-0.5">USDT</span>
+                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
+                                    </div>
+                                 )}
+                                 {JSON.parse(user.paymentSettings).cryptoWallets.trc && (
+                                    <div 
+                                       onClick={() => {
+                                          navigator.clipboard.writeText(JSON.parse(user.paymentSettings).cryptoWallets.trc);
+                                          alert('TRC Address copied to clipboard!');
+                                       }}
+                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
+                                    >
+                                       <span className="text-[9px] font-black text-[#ff0013] mb-0.5">TRC</span>
+                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
+                                    </div>
+                                 )}
+                              </div>
+                           )}
                         </div>
                       </div>
                     ) : (

@@ -8,19 +8,18 @@ import {
     faUserCircle,
     faSignOutAlt,
     faBars,
-    faTimes,
     faTicketAlt,
     faCog,
     faShieldAlt,
     faQuestionCircle,
     faChevronLeft,
     faExchangeAlt,
-    faLock,
     faSave,
     faTimesCircle,
     faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import Sidebar from '../../../../components/Sidebar';
 
 const APP_SCRIPT_POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
 
@@ -169,38 +168,13 @@ export default function PersonalDetailsPage() {
 
             {/* Scrollable Content Area */}
             <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col lg:flex-row py-8 px-4 gap-8 overflow-y-auto">
-                {/* Sidebar */}
-                <aside className={`fixed inset-0 bg-white z-40 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:inset-auto lg:w-64 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                    <div className="p-6 lg:p-0">
-                        <div className="lg:hidden flex justify-end mb-8">
-                            <button onClick={() => setIsSidebarOpen(false)} className="text-2xl"><FontAwesomeIcon icon={faTimes} /></button>
-                        </div>
-                        <nav className="space-y-1">
-                            {sidebarItems.map((item, i) => (
-                                item.href && item.href !== '#' ? (
-                                    <Link key={i} href={item.href}
-                                        className={`w-full text-left px-4 py-3 rounded-[12px] flex items-center space-x-3 transition-all ${item.active ? 'bg-[#026CDF] text-white font-black shadow-lg shadow-[#026CDF]/20' : 'text-[#001B41] hover:bg-white hover:shadow-sm font-bold'}`}>
-                                        <FontAwesomeIcon icon={item.icon} className="w-5" />
-                                        <span>{item.label}</span>
-                                    </Link>
-                                ) : (
-                                    <button key={i}
-                                        className={`w-full text-left px-4 py-3 rounded-[12px] flex items-center space-x-3 transition-all ${item.active ? 'bg-[#026CDF] text-white font-black shadow-lg shadow-[#026CDF]/20' : 'text-[#001B41] hover:bg-white hover:shadow-sm font-bold'}`}>
-                                        <FontAwesomeIcon icon={item.icon} className="w-5" />
-                                        <span>{item.label}</span>
-                                    </button>
-                                )
-                            ))}
-                        </nav>
-                        <div className="mt-12 pt-8 border-t border-gray-100">
-                            <Link href="/secure/myaccount/manage" className="flex items-center space-x-3 text-gray-400 hover:text-[#026CDF] transition-colors text-[10px] font-black uppercase tracking-widest">
-                                <FontAwesomeIcon icon={faLock} className="w-4" />
-                                <span>Admin Panel</span>
-                            </Link>
-                        </div>
-                    </div>
-                </aside>
-
+                <Sidebar
+                    sidebarItems={sidebarItems}
+                    isSidebarOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                    adminUsername={admin?.username}
+                />
+                
                 {/* Main Content */}
                 <main className="flex-1 pb-24 lg:pb-0">
                     <button 
@@ -216,7 +190,7 @@ export default function PersonalDetailsPage() {
                     {message && (
                         <div className={`mb-6 p-4 rounded-2xl flex items-center space-x-3 ${
                             message.type === 'success' 
-                                ? 'bg-[#026CDF]/5 border border-[#026CDF]/10 text-[#026CDF]' 
+                                ? 'bg-[#89CF28]/5 border border-[#89CF28]/10 text-[#89CF28]' 
                                 : 'bg-red-50 border border-red-100 text-red-600'
                         }`}>
                             <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faTimesCircle} />
@@ -234,7 +208,7 @@ export default function PersonalDetailsPage() {
                                         name="accountName"
                                         value={formData.accountName}
                                         onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                                         placeholder="Enter your account name"
                                     />
                                 </div>
@@ -246,7 +220,7 @@ export default function PersonalDetailsPage() {
                                         name="accountEmail"
                                         value={formData.accountEmail}
                                         onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                                         placeholder="Enter your account email"
                                     />
                                 </div>
@@ -258,40 +232,34 @@ export default function PersonalDetailsPage() {
                                         name="accountStateCountry"
                                         value={formData.accountStateCountry}
                                         onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
                                         placeholder="Enter your state or country"
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Telegram ID</label>
-                                    <input
-                                        type="text"
-                                        name="telegramId"
-                                        value={formData.telegramId}
-                                        onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
-                                        placeholder="Enter your Telegram ID"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Admin Settings (JSON)</label>
-                                    <textarea
-                                        name="adminSettings"
-                                        value={formData.adminSettings}
-                                        onChange={handleChange}
-                                        rows={4}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41] text-sm font-mono"
-                                        placeholder="{}"
-                                    ></textarea>
-                                </div>
+                                 {/* Admin Settings Card */}
+                                 <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden max-w-2xl mt-6">
+                                     <div className="p-8">
+                                         <h2 className="text-2xl font-black text-[#001B41] mb-6">Admin Settings</h2>
+                                         <div>
+                                             <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Telegram ID</label>
+                                             <input
+                                                 type="text"
+                                                 name="telegramId"
+                                                 value={formData.telegramId}
+                                                 onChange={handleChange}
+                                                 className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+                                                 placeholder="Enter your Telegram ID"
+                                             />
+                                         </div>
+                                     </div>
+                                 </div>
 
                                 <div className="pt-4 border-t border-gray-100">
                                     <button
                                         onClick={handleSave}
                                         disabled={saving}
-                                        className="w-full bg-[#026CDF] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-[#026CDF]/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center"
+                                        className="w-full bg-[#89CF28] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-[#89CF28]/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center"
                                     >
                                         {saving ? (
                                             <>
@@ -315,7 +283,7 @@ export default function PersonalDetailsPage() {
             {/* Fixed Footer */}
             <footer className="bg-white border-t border-gray-100 py-6 sticky bottom-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">© {new Date().getFullYear()} Ticketmaster. Secure Ticket System.</p>
+                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">© {new Date().getFullYear()} Ticket-0.1. Secure Ticket System.</p>
                 </div>
             </footer>
         </div>

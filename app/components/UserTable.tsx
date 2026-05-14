@@ -5,6 +5,18 @@ import AddUserModal from './AddUserModal';
 import { User, Ticket } from '../types';
 import { useUser } from '../UserContext';
 
+interface NewUserFormData {
+  fullName: string;
+  phoneNumber: string;
+  emailAddress: string;
+  seatNumbers: string;
+  transferringSeatNumbers: string;
+  senderName: string;
+  senderEmail: string;
+  userPlatform: string;
+  sendType: string;
+}
+
 interface UserTableProps {
   users: User[];
   tickets: Ticket[];
@@ -14,11 +26,12 @@ const UserTable: React.FC<UserTableProps> = ({ users, tickets }) => {
   const { fetchAllUsers } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [newUserFormData, setNewUserFormData] = useState({
+  const [newUserFormData, setNewUserFormData] = useState<NewUserFormData>({
     fullName: '',
     phoneNumber: '',
     emailAddress: '',
     seatNumbers: '',
+    transferringSeatNumbers: '',
     senderName: '',
     senderEmail: '',
     userPlatform: 'ticketmaster',

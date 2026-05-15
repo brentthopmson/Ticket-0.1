@@ -1,4 +1,5 @@
-// /components/AddTicketModal.tsx
+"use client";
+
 import { useState } from 'react';
 import { useUser } from '../UserContext';
 
@@ -20,6 +21,7 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
     section: '',
     sectionNo: '',
     row: '',
+    category: '',
     seatNumbers: '',
     platform: 'ticketmaster',
     ageRestriction: 'All Ages',
@@ -203,6 +205,17 @@ const AddTicketModal: React.FC<AddTicketModalProps> = ({ onClose }) => {
                 type="text"
                 name="sectionNo"
                 value={formData.sectionNo}
+                onChange={handleChange}
+                className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Category</label>
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
                 onChange={handleChange}
                 className="w-full p-3 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
               />

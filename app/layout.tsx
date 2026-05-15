@@ -14,7 +14,7 @@ export const metadata = {
   description: 'Search and buy tickets for your favorite artists, teams, and shows at Ticketmaster.',
   keywords: 'ticketmaster, buy tickets, sell tickets, concert, sport, theater',
   manifest: '/manifest.json',
-  viewport: 'width=device-width, initial-scale=1, format-detection=telephone=no',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
   icons: {
     icon: [
       { url: 'https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png' },

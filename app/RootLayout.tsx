@@ -54,6 +54,7 @@ export default function RootLayoutWrapper({
 
   const shouldShowHeaderFooter =
     pathname !== null &&
+    pathname !== '/' &&
     !pathname.startsWith('/secure') &&
     !pathname.includes('/invalid') &&
     !pathname.includes('/admin') &&

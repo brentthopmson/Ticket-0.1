@@ -18,8 +18,8 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #f4f7f9;
-  overscroll-behavior: none;
+  background: black;
+  overflow-x: hidden;
 }
 
 /* Spinner styles */

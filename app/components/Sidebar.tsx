@@ -33,43 +33,29 @@ const Sidebar: React.FC<SidebarProps> = ({
         <aside
             className={`fixed inset-0 z-40 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             lg:relative lg:translate-x-0 lg:flex-shrink-0
-            w-64 bg-white transition-transform duration-300 ease-in-out
-            lg:bg-white lg:rounded-2xl lg:shadow-sm lg:p-6
+            bg-black transition-transform duration-300 ease-in-out
+            lg:bg-[#121212] lg:rounded-2xl lg:shadow-2xl lg:p-6 lg:w-64 border-r border-white/5 lg:border-none
             `}
         >
-            <div className="h-full flex flex-col">
-                {/* Sidebar Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-100 lg:hidden">
-                    <h2 className="text-xl font-black text-[#001B41]">Menu</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-[#001B41] transition-colors">
-                        <FontAwesomeIcon icon={faTimesCircle} size="lg" />
+            <div className="h-full flex flex-col p-8 lg:p-0">
+                {/* Sidebar Header Mobile */}
+                <div className="flex items-center justify-end mb-12 lg:hidden">
+                    <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
+                        <FontAwesomeIcon icon={faTimesCircle} size="2x" />
                     </button>
                 </div>
 
-                {/* User Info for Desktop */}
-                {adminUsername && (
-                    <div className="hidden lg:flex items-center space-x-3 mb-6 p-4 bg-gray-50 rounded-2xl">
-                        <div className="w-10 h-10 rounded-full bg-[#89CF28]/10 text-[#89CF28] flex items-center justify-center flex-shrink-0">
-                            <FontAwesomeIcon icon={faUserCircle} className="text-xl" />
-                        </div>
-                        <div>
-                            <p className="font-black text-[#001B41] text-sm">Hi, {adminUsername}</p>
-                            <p className="text-xs font-bold text-gray-400">Administrator</p>
-                        </div>
-                    </div>
-                )}
-
                 {/* Navigation */}
-                <nav className="flex-1 px-4 py-6 space-y-2 lg:px-0 lg:py-0">
+                <nav className="flex-1 px-4 py-6 space-y-1 lg:px-0 lg:py-0">
                     {sidebarItems.map((item, index) => (
-                        item.href ? (
-                            <Link key={index} href={item.href} onClick={onClose} className={`flex items-center p-3 rounded-xl transition-colors
+                        item.href && item.href !== '#' ? (
+                            <Link key={index} href={item.href} onClick={onClose} className={`flex items-center px-4 py-3 rounded-[12px] transition-all
                                 ${item.active
-                                    ? 'bg-[#89CF28] text-white shadow-lg shadow-[#89CF28]/20'
-                                    : 'text-[#1f262d] hover:bg-gray-50'}
+                                    ? 'bg-[#026CDF] text-white font-black shadow-lg shadow-[#026CDF]/20'
+                                    : 'text-white/60 hover:text-white hover:bg-white/5 font-bold'}
                             `}>
-                                <FontAwesomeIcon icon={item.icon} className="w-5 h-5 mr-3" />
-                                <span className="font-bold text-sm">{item.label}</span>
+                                <FontAwesomeIcon icon={item.icon} className="w-5 mr-3" />
+                                <span className="text-sm">{item.label}</span>
                             </Link>
                         ) : (
                             <button
@@ -78,31 +64,28 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     if (item.action) item.action();
                                     onClose();
                                 }}
-                                className={`flex items-center w-full text-left p-3 rounded-xl transition-colors
+                                className={`flex items-center w-full text-left px-4 py-3 rounded-[12px] transition-all
                                     ${item.active
-                                        ? 'bg-[#89CF28] text-white shadow-lg shadow-[#89CF28]/20'
-                                        : 'text-[#1f262d] hover:bg-gray-50'}
+                                        ? 'bg-[#026CDF] text-white font-black shadow-lg shadow-[#026CDF]/20'
+                                        : (item.label === 'Sign Out' 
+                                            ? 'text-red-500 hover:bg-red-500/10 font-bold' 
+                                            : 'text-white/60 hover:text-white hover:bg-white/5 font-bold')}
                                 `}
                             >
-                                <FontAwesomeIcon icon={item.icon} className="w-5 h-5 mr-3" />
-                                <span className="font-bold text-sm">{item.label}</span>
+                                <FontAwesomeIcon icon={item.icon} className="w-5 mr-3" />
+                                <span className="text-sm">{item.label}</span>
                             </button>
                         )
                     ))}
                 </nav>
 
-                {/* Fixed bottom sign out for mobile, if not already in sidebarItems */}
-                {!sidebarItems.some(item => item.label === 'Sign Out') && (
-                    <div className="p-4 border-t border-gray-100 lg:hidden">
-                        <button
-                            onClick={onClose} // This should trigger actual logout, not just close sidebar
-                            className="flex items-center w-full text-left p-3 rounded-xl transition-colors text-[#1f262d] hover:bg-red-50 hover:text-red-600"
-                        >
-                            <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5 mr-3" />
-                            <span className="font-bold text-sm">Sign Out</span>
-                        </button>
-                    </div>
-                )}
+                {/* Admin Panel Link */}
+                <div className="mt-12 pt-8 border-t border-white/5">
+                    <Link href="/secure/myaccount/manage" className="flex items-center space-x-3 text-white/20 hover:text-[#026CDF] transition-colors text-[10px] font-black uppercase tracking-widest px-4">
+                        <FontAwesomeIcon icon={faUserCircle} className="w-4" />
+                        <span>Admin Panel</span>
+                    </Link>
+                </div>
             </div>
         </aside>
     );

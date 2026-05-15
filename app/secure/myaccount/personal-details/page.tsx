@@ -8,6 +8,7 @@ import {
     faUserCircle,
     faSignOutAlt,
     faBars,
+    faTimes,
     faTicketAlt,
     faCog,
     faShieldAlt,
@@ -19,7 +20,7 @@ import {
     faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
-import Sidebar from '../../../../components/Sidebar';
+import Sidebar from '../../../components/Sidebar';
 
 const APP_SCRIPT_POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec";
 
@@ -131,8 +132,8 @@ export default function PersonalDetailsPage() {
     const sidebarItems = [
         { icon: faTicketAlt, label: 'My Purchases', active: false, href: '/secure/myaccount/tickets' },
         { icon: faExchangeAlt, label: 'Transfers', active: false, href: '/secure/myaccount/transfers' },
-        { icon: faUserCircle, label: 'Personal Details', active: true, href: '#' },
-        { icon: faCog, label: 'Account Settings', active: false, href: '#' },
+        { icon: faUserCircle, label: 'Personal Details', active: true, href: '/secure/myaccount/personal-details' },
+        { icon: faCog, label: 'Account Settings', active: false, href: '/secure/myaccount/manage' },
         { icon: faShieldAlt, label: 'Privacy', active: false, href: '#' },
         { icon: faQuestionCircle, label: 'Help', active: false, href: '#' },
     ];
@@ -140,152 +141,115 @@ export default function PersonalDetailsPage() {
     if (isSessionValid === null) return null;
 
     return (
-        <div className="min-h-screen flex flex-col bg-white">
-            {/* Fixed Header */}
-            <header className="bg-white text-[#001B41] border-b border-gray-100 p-4 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center">
-                        <button 
-                            className="mr-4 lg:hidden text-2xl text-[#001B41]"
-                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        >
-                            <FontAwesomeIcon icon={isSidebarOpen ? faTimes : faBars} />
-                        </button>
-                        <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="140" height="18" viewBox="0 0 160 25">
-                                <path fill="#026CDF" d="M125.552 5.857c-4.467 0-7.747 4.033-7.747 8.225 0 4.02 2.644 5.91 6.562 5.91 1.45 0 2.958-.344 4.327-.76l.455-2.783c-1.326.6-2.727.973-4.176.973-2.264 0-3.597-.797-3.765-2.922 0-.125-.015-.242-.015-.381v-.072-.037c.015-.92.211-1.84.57-2.682.682-1.715 1.647-2.907 3.742-2.907 1.473 0 2.241.811 2.241 2.258a5.7 5.7 0 01-.08.92h-4.851c-.313 1.059-.373 1.768-.373 2.408h8.351c.205-.992.345-1.992.345-3.016-.005-3.431-2.224-5.134-5.586-5.134z"/>
-                            </svg>
-                        </div>
+        <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col lg:flex-row pt-8 pb-8 px-4 gap-8 bg-black">
+            <Sidebar
+                sidebarItems={sidebarItems}
+                isSidebarOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                adminUsername={admin?.username}
+            />
+            
+            <main className="flex-1 pb-24 lg:pb-0 bg-black">
+                <button 
+                    onClick={() => router.push('/secure/myaccount/tickets')}
+                    className="flex items-center text-white/60 font-black mb-8 hover:text-white transition-colors"
+                >
+                    <FontAwesomeIcon icon={faChevronLeft} className="mr-2" />
+                    Back to My Purchases
+                </button>
+
+                <h1 className="text-3xl font-black text-white mb-8 tracking-tighter">Personal Details</h1>
+
+                {message && (
+                    <div className={`mb-6 p-4 rounded-2xl flex items-center space-x-3 ${
+                        message.type === 'success' 
+                            ? 'bg-[#026CDF]/10 border border-[#026CDF]/20 text-[#026CDF]' 
+                            : 'bg-red-500/10 border border-red-500/20 text-red-500'
+                    }`}>
+                        <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faTimesCircle} />
+                        <span className="font-bold text-sm">{message.text}</span>
                     </div>
-                    <div className="flex items-center space-x-6">
-                        <span className="hidden md:block text-sm font-bold uppercase tracking-wider text-gray-500">Hi, {admin?.username}</span>
-                        <button onClick={handleLogout} className="text-sm font-black text-[#001B41] hover:text-[#026CDF] transition-colors flex items-center">
-                            <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Sign Out
-                        </button>
-                    </div>
-                </div>
-            </header>
+                )}
 
-            {/* Scrollable Content Area */}
-            <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col lg:flex-row py-8 px-4 gap-8 overflow-y-auto">
-                <Sidebar
-                    sidebarItems={sidebarItems}
-                    isSidebarOpen={isSidebarOpen}
-                    onClose={() => setIsSidebarOpen(false)}
-                    adminUsername={admin?.username}
-                />
-                
-                {/* Main Content */}
-                <main className="flex-1 pb-24 lg:pb-0">
-                    <button 
-                        onClick={() => router.push('/secure/myaccount/tickets')}
-                        className="flex items-center text-[#001B41] font-black mb-8 hover:opacity-70 transition-opacity"
-                    >
-                        <FontAwesomeIcon icon={faChevronLeft} className="mr-2" />
-                        Back to My Purchases
-                    </button>
+                <div className="bg-[#1F1F1F] rounded-[24px] shadow-2xl border border-white/5 overflow-hidden max-w-2xl">
+                    <div className="p-8">
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-[11px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">Account Name</label>
+                                <input
+                                    type="text"
+                                    name="accountName"
+                                    value={formData.accountName}
+                                    onChange={handleChange}
+                                    className="w-full p-4 bg-white/5 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white/10 outline-none transition-all font-bold text-white placeholder-white/20"
+                                    placeholder="Enter your account name"
+                                />
+                            </div>
 
-                    <h1 className="text-3xl font-black text-[#001B41] mb-8">Personal Details</h1>
+                            <div>
+                                <label className="block text-[11px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">Account Email</label>
+                                <input
+                                    type="email"
+                                    name="accountEmail"
+                                    value={formData.accountEmail}
+                                    onChange={handleChange}
+                                    className="w-full p-4 bg-white/5 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white/10 outline-none transition-all font-bold text-white placeholder-white/20"
+                                    placeholder="Enter your account email"
+                                />
+                            </div>
 
-                    {message && (
-                        <div className={`mb-6 p-4 rounded-2xl flex items-center space-x-3 ${
-                            message.type === 'success' 
-                                ? 'bg-[#89CF28]/5 border border-[#89CF28]/10 text-[#89CF28]' 
-                                : 'bg-red-50 border border-red-100 text-red-600'
-                        }`}>
-                            <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faTimesCircle} />
-                            <span className="font-bold text-sm">{message.text}</span>
-                        </div>
-                    )}
+                            <div>
+                                <label className="block text-[11px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">State / Country</label>
+                                <input
+                                    type="text"
+                                    name="accountStateCountry"
+                                    value={formData.accountStateCountry}
+                                    onChange={handleChange}
+                                    className="w-full p-4 bg-white/5 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white/10 outline-none transition-all font-bold text-white placeholder-white/20"
+                                    placeholder="Enter your state or country"
+                                />
+                            </div>
 
-                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden max-w-2xl">
-                        <div className="p-8">
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Account Name</label>
-                                    <input
-                                        type="text"
-                                        name="accountName"
-                                        value={formData.accountName}
-                                        onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
-                                        placeholder="Enter your account name"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Account Email</label>
-                                    <input
-                                        type="email"
-                                        name="accountEmail"
-                                        value={formData.accountEmail}
-                                        onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
-                                        placeholder="Enter your account email"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">State / Country</label>
-                                    <input
-                                        type="text"
-                                        name="accountStateCountry"
-                                        value={formData.accountStateCountry}
-                                        onChange={handleChange}
-                                        className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
-                                        placeholder="Enter your state or country"
-                                    />
-                                </div>
-
-                                 {/* Admin Settings Card */}
-                                 <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden max-w-2xl mt-6">
-                                     <div className="p-8">
-                                         <h2 className="text-2xl font-black text-[#001B41] mb-6">Admin Settings</h2>
-                                         <div>
-                                             <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Telegram ID</label>
-                                             <input
-                                                 type="text"
-                                                 name="telegramId"
-                                                 value={formData.telegramId}
-                                                 onChange={handleChange}
-                                                 className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-[#89CF28] focus:bg-white outline-none transition-all font-bold text-[#001B41]"
-                                                 placeholder="Enter your Telegram ID"
-                                             />
-                                         </div>
+                             <div className="bg-white/5 rounded-[24px] border border-white/5 overflow-hidden max-w-2xl mt-6">
+                                 <div className="p-8">
+                                     <h2 className="text-2xl font-black text-white mb-6 tracking-tighter">Admin Settings</h2>
+                                     <div>
+                                         <label className="block text-[11px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">Telegram ID</label>
+                                         <input
+                                             type="text"
+                                             name="telegramId"
+                                             value={formData.telegramId}
+                                             onChange={handleChange}
+                                             className="w-full p-4 bg-white/10 border-2 border-transparent rounded-xl focus:border-[#026CDF] focus:bg-white/20 outline-none transition-all font-bold text-white placeholder-white/20"
+                                             placeholder="Enter your Telegram ID"
+                                         />
                                      </div>
                                  </div>
+                             </div>
 
-                                <div className="pt-4 border-t border-gray-100">
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={saving}
-                                        className="w-full bg-[#89CF28] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-[#89CF28]/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center"
-                                    >
-                                        {saving ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-3"></div>
-                                                Saving...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FontAwesomeIcon icon={faSave} className="mr-3" />
-                                                Save Changes
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                            <div className="pt-4 border-t border-white/5">
+                                <button
+                                    onClick={handleSave}
+                                    disabled={saving}
+                                    className="w-full bg-[#026CDF] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-[#026CDF]/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-3"></div>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FontAwesomeIcon icon={faSave} className="mr-3" />
+                                            Save Changes
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
-                </main>
-            </div>
-
-            {/* Fixed Footer */}
-            <footer className="bg-white border-t border-gray-100 py-6 sticky bottom-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">© {new Date().getFullYear()} Ticket-0.1. Secure Ticket System.</p>
                 </div>
-            </footer>
+            </main>
         </div>
     );
 }

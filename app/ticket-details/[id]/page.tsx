@@ -575,15 +575,6 @@ export default function TicketDetails() {
                       );
                     })()}
                   </div>
-
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-200 h-24 flex items-center justify-center">
-                        <p className="text-gray-500 text-xs text-center px-4">Barcode will appear here after transfer is accepted</p>
-                      </div>
-                    )}
-                  </div>
                 </div>
 
                 <div className="mt-6 text-sm text-gray-600">

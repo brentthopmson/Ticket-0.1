@@ -30,7 +30,9 @@ export default function TicketDetailsAccountPage() {
         tickets: allTickets,
         fetchAllTickets,
         setAdmin,
-        setTickets
+        setTickets,
+        setLoggedInAdmin,
+        setUsers
     } = useUser();
 
     const [ticket, setTicket] = useState<Ticket | null>(null);

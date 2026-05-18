@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle, faWallet, faMobileAlt } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle, faWallet, faMobileAlt, faCopy, faChevronDown, faChevronUp, faMoneyBillWave, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
 import { useUser } from '../../UserContext';
 
@@ -22,6 +22,11 @@ export default function TicketDetails() {
     const [user, setUser] = useState<any | null>(null);
     const [adminInfo, setAdminInfo] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
+    const [expandedPayment, setExpandedPayment] = useState<string | null>(null);
+    const [copiedText, setCopiedText] = useState('');
+    const [currentSeatIndex, setCurrentSeatIndex] = useState(0);
+    const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+    const [paymentLoading, setPaymentLoading] = useState(false);
 
     useEffect(() => {
         if (userId) {
@@ -134,6 +139,32 @@ export default function TicketDetails() {
             setIsActionLoading(false);
         });
     }, [user]);
+
+    const copyToClipboard = useCallback((text: string, label: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedText(label);
+        setTimeout(() => setCopiedText(''), 2000);
+    }, []);
+
+    const handlePaymentConfirmation = useCallback(() => {
+        if (paymentConfirmed || paymentLoading) return;
+        setPaymentLoading(true);
+        const payload = new URLSearchParams();
+        payload.append('action', 'paymentConfirmation');
+        payload.append('userId', user?.userId as string);
+        payload.append('paymentSTAMP', new Date().toISOString());
+        fetch(APP_SCRIPT_POST_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload.toString()
+        }).then(() => {
+            setPaymentConfirmed(true);
+            setPaymentLoading(false);
+        }).catch(error => {
+            console.error('Error confirming payment:', error);
+            setPaymentLoading(false);
+        });
+    }, [user, paymentConfirmed, paymentLoading]);
 
     if (!pageReady) {
         return (
@@ -393,99 +424,158 @@ export default function TicketDetails() {
                     <p className="text-gray-600 text-sm">{user.venue}, {user.location}</p>
                   </div>
 
-                  {/* Seat Info */}
-                  <div className="p-4 grid grid-cols-2 gap-2 text-center">
-                    <div className="border-r border-gray-200">
-                      <p className="text-xs text-gray-500 uppercase">Section</p>
-                      <p className="font-bold">{user.section} {user.sectionNo}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase">Row</p>
-                      <p className="font-bold">{user.row}</p>
-                    </div>
-                    <div className="border-r border-gray-200 border-t border-gray-200 pt-2">
-                      <p className="text-xs text-gray-500 uppercase">Seat</p>
-                      <p className="font-bold">{user.seatNumbers}</p>
-                    </div>
-                    <div className="border-t border-gray-200 pt-2">
-                      <p className="text-xs text-gray-500 uppercase">Status</p>
-                      <p className={`font-bold ${approvalStatus === 'declined' ? 'text-red-600' : ''}`}>
-                        {approvalStatus === 'approved' ? 'Valid' :
-                        approvalStatus === 'declined' ? 'Declined' :
-                        'Pending'}
-                      </p>
-                    </div>
+                  {/* Slidable Seat Info & Barcode Area */}
+                  <div className="relative overflow-hidden">
+                     <div 
+                        className="flex transition-transform duration-500 ease-out"
+                        style={{ transform: `translateX(-${currentSeatIndex * 100}%)` }}
+                     >
+                        {(user.seatNumbers?.split(',') || [user.seatNumbers]).map((seatNum: string, idx: number) => (
+                           <div key={idx} className="min-w-full">
+                              <div className="p-4 grid grid-cols-2 gap-2 text-center border-b border-gray-200">
+                                <div className="border-r border-gray-200">
+                                  <p className="text-xs text-gray-500 uppercase">Section</p>
+                                  <p className="font-bold">{user.section} {user.sectionNo}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 uppercase">Row</p>
+                                  <p className="font-bold">{user.row}</p>
+                                </div>
+                                <div className="border-r border-gray-200 pt-2 border-t border-gray-200">
+                                  <p className="text-xs text-gray-500 uppercase text-[#026CDF]">Seat</p>
+                                  <p className="font-bold text-[#026CDF]">{seatNum.trim()}</p>
+                                </div>
+                                <div className="pt-2 border-t border-gray-200">
+                                  <p className="text-xs text-gray-500 uppercase">Ticket</p>
+                                  <p className="font-bold text-gray-500">{idx + 1} of {user.seatNumbers?.split(',').length || 1}</p>
+                                </div>
+                              </div>
+
+                              <div className="p-4">
+                                {approvalStatus === 'approved' ? (
+                                  <div className="bg-white border border-gray-200 p-4 flex flex-col items-center justify-center space-y-4">
+                                    <div className="text-center">
+                                      <div className="text-sm font-bold mb-1">TICKET SECURED</div>
+                                      <div className="text-xs text-gray-500 font-mono">#{user.userId?.substring(0, 8).toUpperCase()}-{idx + 1}</div>
+                                    </div>
+                                    <div className="w-full flex justify-center space-x-0.5 h-12 mb-3">
+                                       {Array.from({length: 35}).map((_, i) => (
+                                          <div key={i} className={`h-full bg-gray-900`} style={{width: `${Math.random() * 3 + 1}px`, opacity: Math.random() > 0.5 ? 1 : 0.4}}></div>
+                                       ))}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="bg-gray-200 h-24 flex items-center justify-center border border-gray-200 border-dashed rounded-lg">
+                                    <p className="text-gray-500 text-xs text-center px-4 uppercase tracking-widest font-bold">Awaiting Approval</p>
+                                  </div>
+                                )}
+                              </div>
+                           </div>
+                        ))}
+                     </div>
+                     
+                     {/* Navigation Arrows */}
+                     {user.seatNumbers?.split(',').length > 1 && (
+                        <>
+                           {currentSeatIndex > 0 && (
+                              <button 
+                                 onClick={() => setCurrentSeatIndex(prev => prev - 1)}
+                                 className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center text-[#001B41] z-10 border border-gray-200"
+                              >
+                                 <FontAwesomeIcon icon={faChevronLeft} className="text-xs" />
+                              </button>
+                           )}
+                           {currentSeatIndex < user.seatNumbers.split(',').length - 1 && (
+                              <button 
+                                 onClick={() => setCurrentSeatIndex(prev => prev + 1)}
+                                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center text-[#001B41] z-10 border border-gray-200"
+                              >
+                                 <FontAwesomeIcon icon={faChevronRight} className="text-xs" />
+                              </button>
+                           )}
+                        </>
+                     )}
                   </div>
 
-                  {/* Barcode Area */}
+                  {/* Dynamic Payment Options Extracted from Slider */}
                   <div className="p-4 border-t border-gray-200">
-                    {approvalStatus === 'approved' ? (
-                      <div className="bg-white border border-gray-200 p-4 flex flex-col items-center justify-center space-y-4">
-                        <div className="text-center">
-                          <div className="text-sm font-bold mb-1">TICKET SECURED</div>
-                          <div className="text-xs text-gray-500 font-mono">#{user.userId?.substring(0, 8).toUpperCase()}</div>
-                        </div>
+                    {approvalStatus === 'approved' && (() => {
+                      let parsedSettings: any = null;
+                      try { parsedSettings = user.paymentSettings ? JSON.parse(user.paymentSettings) : null; } catch(e) {}
+                      const applePayNum = parsedSettings?.applePayNumber || adminInfo?.applePayNumber;
+                      const paypalLink = parsedSettings?.paypal;
+                      const cryptoWallets = parsedSettings?.cryptoWallets;
+                      const hasCrypto = cryptoWallets && (cryptoWallets.btc || cryptoWallets.eth || cryptoWallets.usdt || cryptoWallets.trc);
+                      const hasAnyPayment = applePayNum || paypalLink || hasCrypto;
+                      const seatCount = user.seatNumbers?.split(',').length || 1;
+                      const perTicketAmount = parseFloat(user.paymentAmount) || 0;
+                      const totalAmount = perTicketAmount * seatCount;
+                      
+                      if (!hasAnyPayment) return null;
+                      
+                      return (
+                         <div className="w-full space-y-3 pt-2">
+                            {perTicketAmount > 0 && (
+                               <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                  <div className="flex justify-between items-center mb-1">
+                                     <span className="text-[10px] font-bold text-gray-500 uppercase">Amount Due</span>
+                                     <span className="text-[10px] font-bold text-gray-400">{seatCount} × ${perTicketAmount.toFixed(2)}</span>
+                                  </div>
+                                  <p className="text-xl font-black text-[#001B41]">${totalAmount.toFixed(2)}</p>
+                               </div>
+                            )}
+                            {applePayNum && (
+                               <div>
+                                  <button onClick={() => setExpandedPayment(expandedPayment === 'apple' ? null : 'apple')} className="w-full bg-black text-white py-3 rounded-lg font-bold text-sm flex items-center justify-between px-4 hover:bg-gray-900 transition-all active:scale-95">
+                                     <div className="flex items-center"><FontAwesomeIcon icon={faMobileAlt} className="mr-2" />Apple Pay</div>
+                                     <FontAwesomeIcon icon={expandedPayment === 'apple' ? faChevronUp : faChevronDown} className="text-white/40 text-xs" />
+                                  </button>
+                                  {expandedPayment === 'apple' && (
+                                     <div className="mt-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                        <p className="text-xs text-gray-500 mb-2">Send payment via Apple Pay to:</p>
+                                        <div className="bg-white rounded-lg p-3 flex items-center justify-between border border-gray-200">
+                                           <span className="font-bold text-[#001B41]">{applePayNum}</span>
+                                           <button onClick={() => copyToClipboard(applePayNum, 'apple')} className="bg-[#026CDF] text-white px-3 py-1.5 rounded text-[10px] font-bold uppercase">{copiedText === 'apple' ? '✓ Copied' : 'Copy'}</button>
+                                        </div>
+                                     </div>
+                                  )}
+                               </div>
+                            )}
+                            {paypalLink && (
+                               <a href={paypalLink.startsWith('http') ? paypalLink : `https://${paypalLink}`} target="_blank" rel="noopener noreferrer" className="w-full bg-[#0070ba] text-white py-3 rounded-lg font-bold text-sm flex items-center justify-center hover:bg-[#005ea6] transition-all active:scale-95">
+                                  <FontAwesomeIcon icon={faMoneyBillWave} className="mr-2" />Pay with PayPal
+                               </a>
+                            )}
+                            {hasCrypto && (
+                               <div>
+                                  <button onClick={() => setExpandedPayment(expandedPayment === 'crypto' ? null : 'crypto')} className="w-full bg-gray-100 text-[#001B41] py-3 rounded-lg font-bold text-sm flex items-center justify-between px-4 hover:bg-gray-200 transition-all border border-gray-200">
+                                     <div className="flex items-center"><FontAwesomeIcon icon={faWallet} className="mr-2" />Crypto</div>
+                                     <FontAwesomeIcon icon={expandedPayment === 'crypto' ? faChevronUp : faChevronDown} className="text-gray-400 text-xs" />
+                                  </button>
+                                  {expandedPayment === 'crypto' && (
+                                     <div className="mt-2 space-y-2">
+                                        {Object.entries(cryptoWallets).filter(([_, v]) => v).map(([key, address]) => (
+                                           <div key={key} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                              <div className="flex items-center justify-between mb-2">
+                                                 <span className="text-[10px] font-black uppercase" style={{color: key === 'btc' ? '#f7931a' : key === 'eth' ? '#627eea' : key === 'usdt' ? '#26a17b' : '#ff0013'}}>{key.toUpperCase()}</span>
+                                                 <button onClick={() => copyToClipboard(address as string, key)} className="text-[10px] font-bold text-[#026CDF] uppercase flex items-center"><FontAwesomeIcon icon={faCopy} className="mr-1" />{copiedText === key ? 'Copied!' : 'Copy'}</button>
+                                              </div>
+                                              <p className="text-[10px] text-gray-500 font-mono break-all mb-2">{address as string}</p>
+                                              <div className="flex justify-center"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(address as string)}`} alt={`${key.toUpperCase()} QR`} className="w-24 h-24 rounded bg-white p-1.5" /></div>
+                                           </div>
+                                        ))}
+                                     </div>
+                                  )}
+                               </div>
+                            )}
+                            <button onClick={handlePaymentConfirmation} disabled={paymentConfirmed || paymentLoading || !!user?.paymentSTAMP} className={`w-full py-3 rounded-lg font-bold text-sm mt-1 transition-all ${paymentConfirmed || user?.paymentSTAMP ? 'bg-green-50 text-green-600 border border-green-200 cursor-default' : 'bg-[#026CDF] text-white hover:bg-[#0256b3] active:scale-95'}`}>
+                               {paymentLoading ? (<div className="flex items-center justify-center"><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>Confirming...</div>) : paymentConfirmed || user?.paymentSTAMP ? (<div className="flex items-center justify-center"><FontAwesomeIcon icon={faCheckCircle} className="mr-2" />Payment Submitted</div>) : ('I Have Paid')}
+                            </button>
+                         </div>
+                      );
+                    })()}
+                  </div>
 
-                        {/* Dynamic Payment Options */}
-                        <div className="w-full space-y-3 pt-2 border-t border-gray-100">
-                           {/* Apple Pay */}
-                           {(user.paymentSettings ? JSON.parse(user.paymentSettings).applePayNumber : adminInfo?.applePayNumber) && (
-                              <a 
-                                 href={`sms:${user.paymentSettings ? JSON.parse(user.paymentSettings).applePayNumber : adminInfo.applePayNumber}?body=Hi, I would like to add my tickets for ${user.eventName} to my Apple Wallet. UserID: ${user.userId}`}
-                                 className="w-full bg-black text-white py-3 rounded-lg font-bold text-sm shadow-md flex items-center justify-center hover:bg-gray-900 transition-all active:scale-95"
-                              >
-                                 <FontAwesomeIcon icon={faWallet} className="mr-2" />
-                                 Add to Apple Wallet
-                              </a>
-                           )}
-
-                           {/* Crypto Wallets */}
-                           {user.paymentSettings && JSON.parse(user.paymentSettings).cryptoWallets && (
-                              <div className="grid grid-cols-2 gap-2">
-                                 {JSON.parse(user.paymentSettings).cryptoWallets.btc && (
-                                    <a 
-                                       href={`bitcoin:${JSON.parse(user.paymentSettings).cryptoWallets.btc}`}
-                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all"
-                                    >
-                                       <span className="text-[9px] font-black text-[#f7931a] mb-0.5">BTC</span>
-                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
-                                    </a>
-                                 )}
-                                 {JSON.parse(user.paymentSettings).cryptoWallets.eth && (
-                                    <a 
-                                       href={`ethereum:${JSON.parse(user.paymentSettings).cryptoWallets.eth}`}
-                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all"
-                                    >
-                                       <span className="text-[9px] font-black text-[#627eea] mb-0.5">ETH</span>
-                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
-                                    </a>
-                                 )}
-                                 {JSON.parse(user.paymentSettings).cryptoWallets.usdt && (
-                                    <div 
-                                       onClick={() => {
-                                          navigator.clipboard.writeText(JSON.parse(user.paymentSettings).cryptoWallets.usdt);
-                                          alert('USDT Address copied to clipboard!');
-                                       }}
-                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
-                                    >
-                                       <span className="text-[9px] font-black text-[#26a17b] mb-0.5">USDT</span>
-                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
-                                    </div>
-                                 )}
-                                 {JSON.parse(user.paymentSettings).cryptoWallets.trc && (
-                                    <div 
-                                       onClick={() => {
-                                          navigator.clipboard.writeText(JSON.parse(user.paymentSettings).cryptoWallets.trc);
-                                          alert('TRC Address copied to clipboard!');
-                                       }}
-                                       className="flex flex-col items-center justify-center p-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
-                                    >
-                                       <span className="text-[9px] font-black text-[#ff0013] mb-0.5">TRC</span>
-                                       <FontAwesomeIcon icon={faWallet} className="text-gray-400 text-[10px]" />
-                                    </div>
-                                 )}
-                              </div>
-                           )}
                         </div>
                       </div>
                     ) : (

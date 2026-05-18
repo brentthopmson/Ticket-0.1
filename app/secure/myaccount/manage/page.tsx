@@ -45,8 +45,8 @@ export default function ManageDashboard() {
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
     useEffect(() => {
-        const adminUsername = sessionStorage.getItem("loggedInAdmin");
-        const adminData = sessionStorage.getItem('adminData');
+        const adminUsername = localStorage.getItem("loggedInAdmin");
+        const adminData = localStorage.getItem('adminData');
     
         if (adminUsername && adminData) {
             try {
@@ -58,12 +58,16 @@ export default function ManageDashboard() {
                 fetchAllTickets();
             } catch (e) {
                 console.error("Error parsing admin data", e);
+                localStorage.removeItem('adminData');
+                localStorage.removeItem('loggedInAdmin');
+                setAdmin(null);
+                setLoggedInAdmin(null);
                 setIsSessionValid(false);
             }
         } else {
             setIsSessionValid(false);
         }
-    }, [setAdmin, fetchAllUsers, fetchAllTickets]);
+    }, [setAdmin, fetchAllUsers, fetchAllTickets, setLoggedInAdmin]);
 
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(allUsers)) {
@@ -241,8 +245,8 @@ export default function ManageDashboard() {
                     <div className="p-5 mt-4">
                         <button 
                             onClick={() => {
-                                sessionStorage.removeItem("loggedInAdmin");
-                                sessionStorage.removeItem("adminData");
+                                localStorage.removeItem("loggedInAdmin");
+                                localStorage.removeItem("adminData");
                                 router.push('/login');
                             }}
                             className="w-full bg-[#1F1F1F] text-red-500 py-4 rounded-xl font-black text-sm uppercase tracking-widest border border-white/5 active:bg-red-500 active:text-white transition-all shadow-lg"

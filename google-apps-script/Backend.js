@@ -49,6 +49,8 @@ function doPost(e) {
         return transferTicket(userSheet, params);
       case "deleteTicket":
         return deleteTicket(ticketSheet, params);
+      case "paymentConfirmation":
+        return paymentConfirmation(userSheet, params);
       case "updateAdminExpiry":
         updateAdminExpiry();
         return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Admin expiry statuses updated" })).setMimeType(ContentService.MimeType.JSON);
@@ -61,6 +63,16 @@ function doPost(e) {
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({ error: error.message })).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+/**
+ * Helper to get proper display name for a platform
+ */
+function getPlatformDisplayName(platform) {
+  const platformLower = (platform || "").toLowerCase();
+  if (platformLower === "uefa") return "UEFA";
+  if (platformLower === "ticketmaster") return "Ticketmaster";
+  return "Viagogo";
 }
 
 /**
@@ -123,8 +135,9 @@ function ticketApproval(sheet, params) {
 
     // Dynamic Sender Email from Settings
     const senderEmail = getPlatformEmailSender(platform) || data[rowIndex][headers.indexOf("senderEmail")] || "no-reply@viagogo.com";
+    const senderDisplayName = getPlatformDisplayName(platform);
 
-    sendTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject);
+    sendTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject, senderDisplayName);
   }
 
   return ContentService.createTextOutput(JSON.stringify({
@@ -161,8 +174,9 @@ function retractTicket(sheet, params) {
 
   // Dynamic Sender Email from Settings
   const senderEmail = getPlatformEmailSender(platform) || data[rowIndex][headers.indexOf("senderEmail")] || "no-reply@viagogo.com";
+  const senderDisplayName = getPlatformDisplayName(platform);
 
-  sendTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject);
+  sendTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject, senderDisplayName);
 
   return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Ticket transfer retracted successfully" })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -208,15 +222,16 @@ function transferTicket(userSheet, params) {
 
   const receiverEmail = params.emailAddress;
   const templateName = platform + "Transfer";
-  const subject = `Fwd: ${params.senderName} Transferred your Tickets for ${userData.eventName}`;
+  const senderDisplayName = getPlatformDisplayName(platform);
+  const subject = `${params.senderName} Transferred your Tickets for ${userData.eventName}`;
 
   // Dynamic Sender Email from Settings
   const senderEmail = getPlatformEmailSender(platform) || params.senderEmail;
 
   if (sendType === "draft") {
-    draftTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject);
+    draftTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject, senderDisplayName);
   } else {
-    sendTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject);
+    sendTemplatedEmail(senderEmail, receiverEmail, user, templateName, subject, senderDisplayName);
   }
 
   const newTransferSTAMPIndex = headers.indexOf('newTransferSTAMP');
@@ -266,7 +281,7 @@ function deleteTicket(sheet, params) {
   return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
 }
 
-function sendTemplatedEmail(senderEmail, receiverEmail, templateData, templateName, subject) {
+function sendTemplatedEmail(senderEmail, receiverEmail, templateData, templateName, subject, senderDisplayName) {
   try {
     const templateFile = HtmlService.createTemplateFromFile(templateName);
     templateFile.templateData = templateData;
@@ -274,6 +289,7 @@ function sendTemplatedEmail(senderEmail, receiverEmail, templateData, templateNa
     
     GmailApp.sendEmail(receiverEmail, subject, 'Please use an HTML-compatible email client to view this ticket transfer.', {
       htmlBody: htmlBody,
+      name: senderDisplayName
     });
     return true;
   } catch (error) {
@@ -282,7 +298,7 @@ function sendTemplatedEmail(senderEmail, receiverEmail, templateData, templateNa
   }
 }
 
-function draftTemplatedEmail(senderEmail, receiverEmail, templateData, templateName, subject) {
+function draftTemplatedEmail(senderEmail, receiverEmail, templateData, templateName, subject, senderDisplayName) {
   try {
     const templateFile = HtmlService.createTemplateFromFile(templateName);
     templateFile.templateData = templateData;
@@ -290,6 +306,7 @@ function draftTemplatedEmail(senderEmail, receiverEmail, templateData, templateN
     
     GmailApp.createDraft(receiverEmail, subject, 'Please use an HTML-compatible email client to view this ticket transfer.', {
       htmlBody: htmlBody,
+      name: senderDisplayName
     });
     return true;
   } catch (error) {
@@ -411,4 +428,28 @@ function notifyAdminExpiry() {
       }
     }
   }
+}
+
+function paymentConfirmation(sheet, params) {
+  const headers = sheet.getDataRange().getValues()[0];
+  const userIdCol = headers.indexOf("userId");
+  const paymentSTAMPCol = headers.indexOf("paymentSTAMP");
+
+  if (userIdCol === -1 || paymentSTAMPCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Required columns missing. Ensure 'paymentSTAMP' column exists." })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => row[userIdCol] == params.userId);
+
+  if (rowIndex === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "User ID not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  sheet.getRange(rowIndex + 1, paymentSTAMPCol + 1).setValue(new Date());
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    message: "Payment confirmation submitted"
+  })).setMimeType(ContentService.MimeType.JSON);
 }

@@ -25,14 +25,14 @@ export default function RootLayoutWrapper({
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const admin = sessionStorage.getItem("loggedInAdmin");
+    const admin = localStorage.getItem("loggedInAdmin");
     if (admin) {
       setLoggedInAdmin(admin);
     }
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("loggedInAdmin");
+    localStorage.removeItem("loggedInAdmin");
     setLoggedInAdmin(null);
     router.push('/');
   };

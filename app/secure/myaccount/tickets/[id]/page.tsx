@@ -17,6 +17,7 @@ import {
     faRoute,
     faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link';
 import TransferModal from '../../../../components/TransferModal';
 
 export default function TicketDetailsAccountPage() {
@@ -47,13 +48,14 @@ export default function TicketDetailsAccountPage() {
     }, []);
 
     useEffect(() => {
-        const adminUsername = sessionStorage.getItem("loggedInAdmin");
-        const adminData = sessionStorage.getItem('adminData');
+        const adminUsername = localStorage.getItem("loggedInAdmin");
+        const adminData = localStorage.getItem('adminData');
     
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
+                setLoggedInAdmin(adminUsername);
                 setIsSessionValid(true);
                 if (allTickets.length === 0) {
                     fetchAllTickets();
@@ -65,7 +67,7 @@ export default function TicketDetailsAccountPage() {
         } else {
             router.replace('/login');
         }
-    }, [setAdmin, router, allTickets.length, fetchAllTickets]);
+    }, [setAdmin, router, allTickets.length, fetchAllTickets, setLoggedInAdmin]);
 
     useEffect(() => {
         if (isSessionValid && allTickets.length > 0) {
@@ -85,12 +87,12 @@ export default function TicketDetailsAccountPage() {
             {/* Dynamic Header */}
             <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex items-center justify-between px-4 py-4 ${scrolled ? 'bg-[#1F1F1F] text-white shadow-xl' : 'bg-transparent text-white'}`}>
                 <div className="flex items-center space-x-3 overflow-hidden">
-                    <button 
-                        onClick={() => router.push("/secure/myaccount/tickets")}
+                    <Link 
+                        href="/secure/myaccount/tickets"
                         className={`w-10 h-10 flex items-center justify-center transition-all ${scrolled ? 'text-white' : 'bg-black/40 rounded-full'}`}
                     >
                         <FontAwesomeIcon icon={faChevronLeft} />
-                    </button>
+                    </Link>
                     {scrolled && (
                         <div className="animate-in slide-in-from-left-2 duration-300 truncate">
                             <h2 className="text-xs font-black uppercase tracking-tight truncate max-w-[200px]">{ticket.eventName}</h2>

@@ -30,8 +30,8 @@ export default function TransfersPage() {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        const adminUsername = sessionStorage.getItem("loggedInAdmin");
-        const adminData = sessionStorage.getItem('adminData');
+        const adminUsername = localStorage.getItem("loggedInAdmin");
+        const adminData = localStorage.getItem('adminData');
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);

@@ -10,6 +10,7 @@ import {
     faSearch,
     faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link';
 
 export default function MyTicketsPage() {
     const router = useRouter();
@@ -19,23 +20,25 @@ export default function MyTicketsPage() {
         fetchAllTickets,
         setAdmin,
         setUsers,
-        setTickets
+        setTickets,
+        setLoggedInAdmin
     } = useUser();
 
-    const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
+    const [localAdmin, setLocalAdmin] = useState<string | null>(null);
     const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
     const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
 
     useEffect(() => {
-        const adminUsername = sessionStorage.getItem("loggedInAdmin");
-        const adminData = sessionStorage.getItem('adminData');
+        const adminUsername = localStorage.getItem("loggedInAdmin");
+        const adminData = localStorage.getItem('adminData');
     
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
                 setLoggedInAdmin(adminUsername);
+                setLocalAdmin(adminUsername);
                 setIsSessionValid(true);
                 fetchAllTickets();
             } catch (e) {
@@ -45,12 +48,12 @@ export default function MyTicketsPage() {
         } else {
             router.replace('/login');
         }
-    }, [setAdmin, router, fetchAllTickets]);
+    }, [setAdmin, router, fetchAllTickets, setLoggedInAdmin]);
 
     useEffect(() => {
-        if (isSessionValid === true && loggedInAdmin && Array.isArray(allTickets)) {
+        if (isSessionValid === true && localAdmin && Array.isArray(allTickets)) {
             const filtered = allTickets.filter((t) => {
-                const matchesAdmin = t.admin === loggedInAdmin;
+                const matchesAdmin = t.admin === localAdmin;
                 const isNotDeleted = !t.deletedSTAMP || t.deletedSTAMP.trim() === "";
                 const platformList = t.platform?.toLowerCase().split(',').map(p => p.trim()) || [];
                 const matchesPlatform = platformList.includes("ticketmaster");
@@ -65,7 +68,7 @@ export default function MyTicketsPage() {
             });
             setFilteredTickets(filtered);
         }
-    }, [allTickets, loggedInAdmin, isSessionValid, activeTab]);
+    }, [allTickets, localAdmin, isSessionValid, activeTab]);
 
     if (isSessionValid === null) return null;
 
@@ -91,10 +94,10 @@ export default function MyTicketsPage() {
             <div className="flex-1 overflow-y-auto bg-gray-100 p-4 space-y-4">
                 {filteredTickets.length > 0 ? (
                     filteredTickets.map((ticket, i) => (
-                        <div 
+                        <Link 
                             key={i}
-                            onClick={() => router.push(`/secure/myaccount/tickets/${ticket.ticketId}`)}
-                            className="bg-white rounded-none overflow-hidden shadow-md active:scale-[0.98] transition-all cursor-pointer"
+                            href={`/secure/myaccount/tickets/${ticket.ticketId}`}
+                            className="block bg-white rounded-none overflow-hidden shadow-md active:scale-[0.98] transition-all cursor-pointer"
                         >
                             {/* Hero Image Section */}
                             <div className="relative w-full aspect-[16/10] bg-black">
@@ -132,7 +135,7 @@ export default function MyTicketsPage() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))
                 ) : (
                     <div className="py-20 text-center">

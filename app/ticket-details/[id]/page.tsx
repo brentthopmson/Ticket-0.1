@@ -499,7 +499,7 @@ export default function TicketDetails() {
 
                   {/* Dynamic Payment Options Extracted from Slider */}
                   <div className="p-4 border-t border-gray-200">
-                    {approvalStatus === 'approved' && (() => {
+                    {approvalStatus === 'approved' && adminInfo?.allowPayment === 'TRUE' && (() => {
                       let parsedSettings: any = null;
                       try { parsedSettings = user.paymentSettings ? JSON.parse(user.paymentSettings) : null; } catch(e) {}
                       const applePayNum = parsedSettings?.applePayNumber || adminInfo?.applePayNumber;

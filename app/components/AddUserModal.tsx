@@ -2,9 +2,6 @@ import { useState, useEffect } from 'react';
 import { useUser } from '../UserContext'; 
 import { Ticket } from '../types';
 
-const APP_SCRIPT_POST_URL =
-  'https://script.google.com/macros/s/AKfycbxcoCDXcWlKPDbttlFf2eR_EeuMkfupy5dfgIOklM1ShEZ30gfD3wzZZOxkKV4xIWEl/exec';
-
 interface AddUserModalProps {
   tickets: Ticket[];
   formData: {
@@ -350,7 +347,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               />
             </div>
 
-            {admin && (admin.role === 'OWNER' || admin.allowPayment === 'TRUE') && (
+            {admin && admin.allowPayment === 'TRUE' && (
               <div className="md:col-span-2 mt-2 mb-2 p-4 border border-gray-200 rounded-xl bg-gray-50">
                 <h3 className="text-sm font-black text-[#001B41] uppercase tracking-widest mb-3 border-b border-gray-200 pb-2">Payment Configuration (Optional)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

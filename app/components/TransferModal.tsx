@@ -253,7 +253,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                             </div>
 
                             {/* Payment Configuration */}
-                            {admin && (admin.role === 'OWNER' || admin.allowPayment === 'TRUE') && (
+                            {admin && admin.allowPayment === 'TRUE' && (
                                 <div className="space-y-4 pt-4 border-t border-gray-100">
                                     <h4 className="text-[11px] font-black text-[#1F1F1F] uppercase tracking-widest">Payment Configuration (Optional)</h4>
                                     <div className="space-y-3">

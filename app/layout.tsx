@@ -5,6 +5,7 @@ import RootLayoutWrapper from './RootLayout';
 import { Inter } from 'next/font/google';
 
 import { UserProvider } from './UserContext';
+import ManifestLoader from './ManifestLoader';
 
 config.autoAddCss = false;
 const inter = Inter({ subsets: ['latin'] });
@@ -43,7 +44,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Ticketmaster" />
-        <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
         <link rel="shortcut icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
         <link rel="apple-touch-icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
@@ -54,6 +54,7 @@ export default function RootLayout({
             {children}
           </RootLayoutWrapper>
         </UserProvider>
+        <ManifestLoader />
       </body>
     </html>
   );

@@ -30,9 +30,10 @@ function doPost(e) {
     const action = params.action;
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const ticketSheet = ss.getSheetByName("ticket"); 
-    const userSheet = ss.getSheetByName("user");   
+    const userSheet = ss.getSheetByName("user");
+    const adminSheet = ss.getSheetByName("admin");
 
-    if (!ticketSheet || !userSheet) {
+    if (!ticketSheet || !userSheet || !adminSheet) {
       return ContentService.createTextOutput(JSON.stringify({ error: "Required sheets not found" })).setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -57,6 +58,16 @@ function doPost(e) {
       case "notifyAdminExpiry":
         notifyAdminExpiry();
         return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Admin expiry notifications sent" })).setMimeType(ContentService.MimeType.JSON);
+      case "adminLoginByToken":
+        return adminLoginByToken(adminSheet, params);
+      case "verifyAdminSession":
+        return verifyAdminSession(adminSheet, params);
+      case "getUserByToken":
+        return getUserByToken(userSheet, params);
+      case "ensureToken":
+        return ensureAdminToken(adminSheet, params);
+      case "updateAdmin":
+        return updateAdminDetails(adminSheet, params);
       default:
         return ContentService.createTextOutput(JSON.stringify({ error: "Invalid action" })).setMimeType(ContentService.MimeType.JSON);
     }
@@ -94,6 +105,176 @@ function getPlatformEmailSender(platform) {
   
   const config = rows.find(row => row[platformIdx].toLowerCase() === platform.toLowerCase());
   return config ? config[emailIdx] : null;
+}
+
+function generateToken() {
+  return Utilities.getUuid();
+}
+
+function ensureAdminToken(sheet, params) {
+  const headers = sheet.getDataRange().getValues()[0];
+  const adminIdCol = headers.indexOf("adminId");
+  const tokenCol = headers.indexOf("token");
+
+  if (adminIdCol === -1 || tokenCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Required columns not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => String(row[adminIdCol]).trim() === String(params.adminId).trim());
+
+  if (rowIndex === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Admin not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const existingToken = String(data[rowIndex][tokenCol]).trim();
+  if (existingToken && existingToken !== "") {
+    // Token already exists, return it
+    return ContentService.createTextOutput(JSON.stringify({ success: true, token: existingToken })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Generate and save a new token
+  const newToken = generateToken();
+  const sheetRange = sheet.getRange(rowIndex + 1, tokenCol + 1);
+  sheetRange.setValue(newToken);
+
+  return ContentService.createTextOutput(JSON.stringify({ success: true, token: newToken })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function adminLoginByToken(sheet, params) {
+  const headers = sheet.getDataRange().getValues()[0];
+  const tokenCol = headers.indexOf("token");
+  const statusCol = headers.indexOf("status");
+  const expiryCol = headers.indexOf("subscriptionExpiry");
+
+  if (tokenCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Token column not found in admin sheet" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => String(row[tokenCol]).trim() === String(params.token).trim());
+
+  if (rowIndex === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Invalid token" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const row = data[rowIndex];
+  const adminRecord = {};
+  headers.forEach((header, i) => { adminRecord[header] = row[i]; });
+
+  if (adminRecord.role !== 'OWNER' && statusCol !== -1) {
+    if (String(adminRecord[statusCol]).toUpperCase() === 'EXPIRED') {
+      return ContentService.createTextOutput(JSON.stringify({ error: "Your subscription has expired. Please contact the administrator." })).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (expiryCol !== -1) {
+      const expiry = new Date(adminRecord[expiryCol]);
+      if (!isNaN(expiry.getTime()) && expiry < new Date()) {
+        return ContentService.createTextOutput(JSON.stringify({ error: "Your subscription has expired. Please contact the administrator." })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+  }
+
+  const passwordCol = headers.indexOf("password");
+  if (passwordCol !== -1) delete adminRecord[headers[passwordCol]];
+
+  return ContentService.createTextOutput(JSON.stringify({ success: true, admin: adminRecord })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function verifyAdminSession(sheet, params) {
+  const headers = sheet.getDataRange().getValues()[0];
+  const adminIdCol = headers.indexOf("adminId");
+  const tokenCol = headers.indexOf("token");
+  const statusCol = headers.indexOf("status");
+  const expiryCol = headers.indexOf("subscriptionExpiry");
+  const planCol = headers.indexOf("plan");
+  const roleCol = headers.indexOf("role");
+
+  if (adminIdCol === -1 && tokenCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "adminId/token column not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const data = sheet.getDataRange().getValues();
+
+  // Lookup by token first, fallback to adminId
+  let rowIndex = -1;
+  if (params.token && tokenCol !== -1) {
+    rowIndex = data.findIndex(row => String(row[tokenCol]).trim() === String(params.token).trim());
+  }
+  if (rowIndex === -1 && params.adminId && adminIdCol !== -1) {
+    rowIndex = data.findIndex(row => String(row[adminIdCol]).trim() === String(params.adminId).trim());
+  }
+
+  if (rowIndex === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ valid: false, error: "Admin not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const row = data[rowIndex];
+  const status = statusCol !== -1 ? String(row[statusCol]).toUpperCase() : "UNKNOWN";
+  const role = roleCol !== -1 ? String(row[roleCol]).toUpperCase() : "OWNER";
+  const subscriptionExpiry = expiryCol !== -1 ? row[expiryCol] : "";
+  const plan = planCol !== -1 ? row[planCol] : "";
+
+  let isExpired = false;
+  if (expiryCol !== -1 && row[expiryCol]) {
+    const expiry = new Date(row[expiryCol]);
+    if (!isNaN(expiry.getTime()) && expiry < new Date()) {
+      isExpired = true;
+    }
+  }
+
+  // Match login logic: only reject CUSTOMER with EXPIRED status or expired subscription
+  let valid = true;
+  if (role === 'CUSTOMER' && (status === 'EXPIRED' || isExpired)) {
+    valid = false;
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({
+    valid: valid,
+    status: isExpired ? "EXPIRED" : status,
+    plan: plan,
+    subscriptionExpiry: subscriptionExpiry
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getUserByToken(sheet, params) {
+  const headers = sheet.getDataRange().getValues()[0];
+  const tokenCol = headers.indexOf("token");
+
+  if (tokenCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Token column not found in user sheet" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => String(row[tokenCol]).trim() === String(params.token).trim());
+
+  if (rowIndex === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "User not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const row = data[rowIndex];
+  const userRecord = {};
+  headers.forEach((header, i) => { userRecord[header] = row[i]; });
+
+  return ContentService.createTextOutput(JSON.stringify({ success: true, user: userRecord })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function updateAdminDetails(sheet, params) {
+  const headers = sheet.getDataRange().getValues()[0];
+  const adminIdCol = headers.indexOf("adminId");
+  if (adminIdCol === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "adminId column not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => String(row[adminIdCol]).trim() === String(params.adminId).trim());
+  if (rowIndex === -1) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Admin not found" })).setMimeType(ContentService.MimeType.JSON);
+  }
+  headers.forEach((header, index) => {
+    if (params[header] && header !== "password" && header !== "adminId") {
+      sheet.getRange(rowIndex + 1, index + 1).setValue(params[header]);
+    }
+  });
+  return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Admin details updated" })).setMimeType(ContentService.MimeType.JSON);
 }
 
 function ticketApproval(sheet, params) {
@@ -191,6 +372,13 @@ function transferTicket(userSheet, params) {
   const lastRow = userSheet.getLastRow();
   const rowValues = userSheet.getRange(lastRow, 1, 1, headers.length).getValues()[0];
 
+  const tokenCol = headers.indexOf("token");
+  let userToken = "";
+  if (tokenCol !== -1) {
+    userToken = generateToken();
+    userSheet.getRange(lastRow, tokenCol + 1).setValue(userToken);
+  }
+
   const userData = {};
   headers.forEach((header, index) => {
     userData[header] = rowValues[index];
@@ -217,6 +405,7 @@ function transferTicket(userSheet, params) {
     description: userData.description,
     terms: userData.terms,
     link: userData.link,
+    token: userToken,
     paymentSettings: params.paymentSettings || "",
   };
 

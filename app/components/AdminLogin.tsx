@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '../UserContext';
 import { User } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faKey } from '@fortawesome/free-solid-svg-icons';
+import { faKey, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 interface AdminLoginProps {
     setLoggedInAdmin: React.Dispatch<React.SetStateAction<string | null>>;
@@ -16,8 +16,35 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const { fetchAdminData, loading, setLoading } = useUser();
+    const [tokenLoggingIn, setTokenLoggingIn] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
+    const { fetchAdminData, loginWithToken, loading, setLoading } = useUser();
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Auto-login via token from URL
+    useEffect(() => {
+        // If already logged in, redirect away from login page
+        if (localStorage.getItem("adminToken")) {
+            setRedirecting(true);
+            setLoading(false);
+            router.push('/secure/myaccount/tickets');
+            return;
+        }
+        const token = searchParams.get('token');
+        if (token) {
+            setTokenLoggingIn(true);
+            loginWithToken(token).then(success => {
+                setTokenLoggingIn(false);
+                if (success) {
+                    setRedirecting(true);
+                    router.push('/secure/myaccount/tickets');
+                } else {
+                    setErrorMessage("Invalid or expired login link. Please sign in manually.");
+                }
+            });
+        }
+    }, [searchParams, loginWithToken, router, setLoading]);
 
     useEffect(() => {
         setLoading(false);
@@ -37,6 +64,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
             const success = await fetchAdminData(username, password);
 
             if (success) {
+                setRedirecting(true);
                 setLoggedInAdmin(username);
                 router.push('/secure/myaccount/tickets');
             } else {
@@ -51,6 +79,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
             setLoading(false);
         }
     };
+
+    if (redirecting) return null;
 
     return (
         <div className="min-h-screen flex flex-col bg-white">
@@ -91,6 +121,13 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
                     <div className="max-w-[480px] w-full mx-auto">
                         <h2 className="text-[28px] font-bold text-[#1F262D] mb-2 uppercase tracking-tight">Sign In or Create Account</h2>
                         <p className="text-[15px] text-gray-500 mb-10">If you don't have an account you will be prompted to create one.</p>
+
+                        {tokenLoggingIn && (
+                            <div className="bg-blue-50 text-[#026CDF] p-6 rounded-lg mb-6 border border-blue-100 flex items-center justify-center space-x-3">
+                                <FontAwesomeIcon icon={faSpinner} className="animate-spin text-lg" />
+                                <span className="font-bold">Signing in securely...</span>
+                            </div>
+                        )}
 
                         {errorMessage && (
                             <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm mb-6 border border-red-100">

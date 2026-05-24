@@ -1,24 +1,23 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faClock, faInfoCircle, faTicketAlt, faUser, faCalendarAlt, faChair, faIdCard, faCheckCircle, faBell, faTimesCircle, faWallet, faMobileAlt, faCopy, faChevronDown, faChevronUp, faMoneyBillWave, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
-import { useUser } from '../../UserContext';
-
 const APP_SCRIPT_POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "";
 const APP_SCRIPT_ADMIN_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_ADMIN_URL || "";
 
 export default function TicketDetails() {
     const router = useRouter();
-    const { fetchUserData } = useUser();
     const [approvalStatus, setApprovalStatus] = useState('pending');
     const [pageReady, setPageReady] = useState(false);
     const initialStatusSet = useRef(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const params = useParams();
-    const userId = params.id as string;
+    const searchParams = useSearchParams();
+    const token = params.id as string;
+    const queryToken = searchParams.get('token');
     const [user, setUser] = useState<any | null>(null);
     const [adminInfo, setAdminInfo] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,39 +28,55 @@ export default function TicketDetails() {
     const [paymentLoading, setPaymentLoading] = useState(false);
 
     useEffect(() => {
-        if (userId) {
-            const fetchAndSetUser = async () => {
-                setLoading(true);
-                try {
-                    const fetchedUser = await fetchUserData(userId);
-                    if (fetchedUser) {
-                        setUser(fetchedUser);
-                        
-                        // Fetch admin who transferred this ticket
-                        if (fetchedUser.admin && APP_SCRIPT_ADMIN_URL) {
-                            const adminResponse = await fetch(`${APP_SCRIPT_ADMIN_URL}`);
-                            const admins = await adminResponse.json();
-                            const relevantAdmin = admins.find((a: any) => a.username === fetchedUser.admin);
-                            if (relevantAdmin) {
-                                setAdminInfo(relevantAdmin);
-                            }
-                        }
-                    } else {
-                        router.push('/invalid');
-                    }
-                } catch (error) {
-                    console.error("Error fetching user:", error);
-                    router.push('/invalid');
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchAndSetUser();
+        // Token is required - either from path param or query param
+        const actualToken = queryToken || token;
+        if (!actualToken) {
+            router.push('/invalid');
+            return;
         }
-    }, [userId, fetchUserData, router]);
+
+        const fetchAndSetUser = async () => {
+            setLoading(true);
+            try {
+                // Look up user by token via GAS
+                const payload = new URLSearchParams();
+                payload.append("action", "getUserByToken");
+                payload.append("token", actualToken);
+                const response = await fetch(APP_SCRIPT_POST_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: payload.toString()
+                });
+                const data = await response.json();
+
+                if (data.success && data.user) {
+                    const fetchedUser = data.user;
+                    setUser(fetchedUser);
+                    
+                    // Fetch admin who transferred this ticket
+                    if (fetchedUser.admin && APP_SCRIPT_ADMIN_URL) {
+                        const adminResponse = await fetch(`${APP_SCRIPT_ADMIN_URL}`);
+                        const admins = await adminResponse.json();
+                        const relevantAdmin = admins.find((a: any) => a.username === fetchedUser.admin);
+                        if (relevantAdmin) {
+                            setAdminInfo(relevantAdmin);
+                        }
+                    }
+                } else {
+                    router.push('/invalid');
+                }
+            } catch (error) {
+                console.error("Error fetching user:", error);
+                router.push('/invalid');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAndSetUser();
+    }, [token, queryToken, router]);
 
     useEffect(() => {
-      if (user && userId && !loading) {
+      if (user && !loading) {
           if (
               user.systemStatus === "DECLINED" ||
               user.systemStatus === "RETRACTED" ||
@@ -83,7 +98,7 @@ export default function TicketDetails() {
           setPageReady(true);
           initialStatusSet.current = true;
       }
-  }, [user, router, userId, loading]);
+   }, [user, router, loading]);
   
     const handleAcceptTicket = useCallback(() => {
         if (user?.approvalSTAMP) return;

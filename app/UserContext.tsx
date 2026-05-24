@@ -1,10 +1,10 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Ticket, Admin } from './types';
-import { useRef } from 'react';
 
+const APP_SCRIPT_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "";
 const APP_SCRIPT_USER_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_USER_URL || "";
 const APP_SCRIPT_TICKET_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_TICKET_URL || "";
 const APP_SCRIPT_ADMIN_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_ADMIN_URL || "";
@@ -26,7 +26,10 @@ interface UserContextProps {
     fetchAllUsers: () => Promise<void>;
     fetchAllTickets: () => Promise<void>;
     fetchAdminData: (username: string, password: string) => Promise<boolean>;
-    fetchUserData: (id: string) => Promise<User | null>; // Corrected declaration
+    fetchUserData: (id: string) => Promise<User | null>;
+    loginWithToken: (token: string) => Promise<boolean>;
+    verifyAdminSession: () => Promise<{ valid: boolean; status?: string; plan?: string; subscriptionExpiry?: string }>;
+    logout: () => void;
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -46,7 +49,10 @@ const UserContext = createContext<UserContextProps>({
     fetchAllUsers: async () => { },
     fetchAllTickets: async () => { },
     fetchAdminData: async () => false,
-    fetchUserData: async () => null, // Corrected default implementation
+    fetchUserData: async () => null,
+    loginWithToken: async () => false,
+    verifyAdminSession: async () => ({ valid: false }),
+    logout: () => { },
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -60,6 +66,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const initialLoad = useRef(true);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const postToGAS = useCallback(async (payload: Record<string, string>) => {
+        const body = new URLSearchParams(payload);
+        const res = await fetch(APP_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: body.toString()
+        });
+        return res.json();
+    }, []);
 
     const fetchWithRetry = useCallback(async (url: string, retries = 3) => {
       let attempt = 0;
@@ -104,10 +121,28 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           return false;
         }
 
-        setAdmin(adminData);
-        localStorage.setItem("loggedInAdmin", username);
-        localStorage.setItem("adminData", JSON.stringify(adminData));
-        return true;
+                setAdmin(adminData);
+                localStorage.setItem("loggedInAdmin", username);
+                localStorage.setItem("adminData", JSON.stringify(adminData));
+                
+                // Save token from sheet data immediately (ensureToken may fail)
+                if (adminData.token) {
+                    localStorage.setItem("adminToken", adminData.token);
+                }
+                
+                // Auto-generate/retrieve token for this admin
+                try {
+                    const tokenResult = await postToGAS({ action: "ensureToken", adminId: adminData.adminId });
+                    if (tokenResult.success && tokenResult.token) {
+                        adminData.token = tokenResult.token;
+                        localStorage.setItem("adminData", JSON.stringify(adminData));
+                        localStorage.setItem("adminToken", tokenResult.token);
+                    }
+                } catch (err) {
+                    console.error("Token generation error:", err);
+                }
+                
+                return true;
       } else {
         alert("Invalid admin credentials!");
         localStorage.removeItem("loggedInAdmin");
@@ -123,6 +158,56 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [fetchWithRetry]);
 
+
+    const logout = useCallback(() => {
+        localStorage.removeItem("loggedInAdmin");
+        localStorage.removeItem("adminData");
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("allUsersData");
+        localStorage.removeItem("allTicketsData");
+        setAdmin(null);
+        setLoggedInAdmin(null);
+        setUsers([]);
+        setTickets([]);
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        router.push('/login');
+    }, [router]);
+
+    const verifyAdminSession = useCallback(async () => {
+        const adminData = localStorage.getItem("adminData");
+        if (!adminData) return { valid: false };
+        try {
+            const parsed: Admin = JSON.parse(adminData);
+            const token = localStorage.getItem("adminToken") || parsed.token;
+            if (token) {
+                return await postToGAS({ action: "verifyAdminSession", token });
+            }
+            return await postToGAS({ action: "verifyAdminSession", adminId: parsed.adminId });
+        } catch {
+            return { valid: false };
+        }
+    }, [postToGAS]);
+
+    const loginWithToken = useCallback(async (token: string): Promise<boolean> => {
+        try {
+            const data = await postToGAS({ action: "adminLoginByToken", token });
+            if (data.success && data.admin) {
+                setAdmin(data.admin);
+                setLoggedInAdmin(data.admin.username);
+                localStorage.setItem("loggedInAdmin", data.admin.username);
+                localStorage.setItem("adminData", JSON.stringify(data.admin));
+                localStorage.setItem("adminToken", token);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Token login error:", error);
+            return false;
+        }
+    }, [postToGAS]);
 
     const fetchUserData = useCallback(async (id: string): Promise<User | null> => { // Corrected implementation
         try {
@@ -250,24 +335,51 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
   }, [searchParams, router, fetchUserData, fetchAllUsers, fetchAllTickets, fetchTicketData]);
 
-  // Add this to your useEffect in UserContext.tsx
+  // Restore admin session from localStorage and verify status
   useEffect(() => {
-    // Check for stored admin data
-    const loggedInAdminUsername = localStorage.getItem("loggedInAdmin");
     const storedAdminData = localStorage.getItem("adminData");
     
     if (storedAdminData) {
       try {
-        setAdmin(JSON.parse(storedAdminData));
+        const parsed: Admin = JSON.parse(storedAdminData);
+        setAdmin(parsed);
+        setLoggedInAdmin(parsed.username);
+        
+        // Verify session is still valid
+        verifyAdminSession().then(result => {
+          if (!result.valid) {
+            alert("Your session has expired. Please log in again.");
+            logout();
+          }
+        });
       } catch (e) {
         console.error("Error parsing stored admin data", e);
         localStorage.removeItem("adminData");
+        localStorage.removeItem("loggedInAdmin");
       }
-    } else if (loggedInAdminUsername) {
-      // If we only have the username but not the full data, try to fetch it
-      fetchAdminData(loggedInAdminUsername, ""); // Password will be ignored in this case
     }
-  }, [fetchAdminData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Periodic status check every 60 seconds
+  useEffect(() => {
+    const storedAdminData = localStorage.getItem("adminData");
+    if (!storedAdminData) return;
+
+    intervalRef.current = setInterval(async () => {
+      const result = await verifyAdminSession();
+      if (!result.valid) {
+        alert("Your session has expired. You have been logged out.");
+        logout();
+      }
+    }, 60000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [verifyAdminSession, logout]);
 
   const value = useMemo(() => ({
     user,
@@ -287,6 +399,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     fetchAllTickets,
     fetchAdminData,
     fetchUserData,
+    loginWithToken,
+    verifyAdminSession,
+    logout,
   }), [
     user,
     users,
@@ -305,6 +420,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     fetchAllTickets,
     fetchAdminData,
     fetchUserData,
+    loginWithToken,
+    verifyAdminSession,
+    logout,
   ]);
 
   return (

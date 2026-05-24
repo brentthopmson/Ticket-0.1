@@ -34,7 +34,9 @@ export default function ManageDashboard() {
         tickets: allTickets, 
         setAdmin, 
         fetchAllUsers, 
-        fetchAllTickets 
+        fetchAllTickets,
+        verifyAdminSession,
+        logout
     } = useUser();
     
     const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
@@ -56,6 +58,13 @@ export default function ManageDashboard() {
                 setIsSessionValid(true);
                 fetchAllUsers();
                 fetchAllTickets();
+                
+                verifyAdminSession().then(result => {
+                    if (!result.valid) {
+                        alert("Your session has expired. Please log in again.");
+                        logout();
+                    }
+                });
             } catch (e) {
                 console.error("Error parsing admin data", e);
                 localStorage.removeItem('adminData');
@@ -67,7 +76,22 @@ export default function ManageDashboard() {
         } else {
             setIsSessionValid(false);
         }
-    }, [setAdmin, fetchAllUsers, fetchAllTickets, setLoggedInAdmin]);
+    }, [setAdmin, fetchAllUsers, fetchAllTickets, setLoggedInAdmin, verifyAdminSession, logout]);
+
+    // Periodic session verification
+    useEffect(() => {
+        if (isSessionValid === true) {
+            const interval = setInterval(async () => {
+                const result = await verifyAdminSession();
+                if (!result.valid) {
+                    alert("Your session has expired. You have been logged out.");
+                    logout();
+                }
+            }, 60000);
+
+            return () => clearInterval(interval);
+        }
+    }, [isSessionValid, verifyAdminSession, logout]);
 
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(allUsers)) {

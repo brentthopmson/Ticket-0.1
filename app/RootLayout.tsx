@@ -20,16 +20,23 @@ export default function RootLayoutWrapper({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useUser();
+  const { user, loading, verifyAdminSession, logout: sessionLogout } = useUser();
   const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Global session verification on mount and pathname change
   useEffect(() => {
-    const admin = localStorage.getItem("loggedInAdmin");
-    if (admin) {
-      setLoggedInAdmin(admin);
+    if (pathname.startsWith('/secure/myaccount') && !loading) {
+      const checkSession = async () => {
+        const result = await verifyAdminSession();
+        if (!result.valid) {
+          alert("Your session has expired. You have been logged out.");
+          sessionLogout();
+        }
+      };
+      checkSession();
     }
-  }, []);
+  }, [pathname, loading, verifyAdminSession, sessionLogout]);
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInAdmin");

@@ -177,14 +177,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }, [router]);
 
     const verifyAdminSession = useCallback(async () => {
+        const token = localStorage.getItem("adminToken");
+        if (token) return { valid: true };
         const adminData = localStorage.getItem("adminData");
         if (!adminData) return { valid: false };
         try {
             const parsed: Admin = JSON.parse(adminData);
-            const token = localStorage.getItem("adminToken") || parsed.token;
-            if (token) {
-                return await postToGAS({ action: "verifyAdminSession", token });
-            }
+            if (parsed.token) return { valid: true };
             return await postToGAS({ action: "verifyAdminSession", adminId: parsed.adminId });
         } catch {
             return { valid: false };
@@ -335,7 +334,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
   }, [searchParams, router, fetchUserData, fetchAllUsers, fetchAllTickets, fetchTicketData]);
 
-  // Restore admin session from localStorage and verify status
+  // Restore admin session from localStorage
   useEffect(() => {
     const storedAdminData = localStorage.getItem("adminData");
     
@@ -344,42 +343,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         const parsed: Admin = JSON.parse(storedAdminData);
         setAdmin(parsed);
         setLoggedInAdmin(parsed.username);
-        
-        // Verify session is still valid
-        verifyAdminSession().then(result => {
-          if (!result.valid) {
-            alert("Your session has expired. Please log in again.");
-            logout();
-          }
-        });
       } catch (e) {
         console.error("Error parsing stored admin data", e);
         localStorage.removeItem("adminData");
         localStorage.removeItem("loggedInAdmin");
       }
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Periodic status check every 60 seconds
-  useEffect(() => {
-    const storedAdminData = localStorage.getItem("adminData");
-    if (!storedAdminData) return;
-
-    intervalRef.current = setInterval(async () => {
-      const result = await verifyAdminSession();
-      if (!result.valid) {
-        alert("Your session has expired. You have been logged out.");
-        logout();
-      }
-    }, 60000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [verifyAdminSession, logout]);
+  }, []);
 
   const value = useMemo(() => ({
     user,

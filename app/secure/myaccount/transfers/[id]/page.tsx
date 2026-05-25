@@ -21,7 +21,7 @@ export default function TransferDetailsPage() {
     const router = useRouter();
     const params = useParams();
     const transferId = params.id as string;
-    const { admin, users, fetchAllUsers, setAdmin, verifyAdminSession, logout } = useUser();
+    const { admin, users, fetchAllUsers, setAdmin } = useUser();
 
     const APP_SCRIPT_POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "";
 
@@ -39,12 +39,6 @@ export default function TransferDetailsPage() {
                 setIsSessionValid(true);
                 fetchAllUsers();
                 
-                verifyAdminSession().then(result => {
-                    if (!result.valid) {
-                        alert("Your session has expired. Please log in again.");
-                        logout();
-                    }
-                });
             } catch (e) {
                 console.error("Error parsing admin data", e);
                 router.replace('/login');
@@ -52,7 +46,7 @@ export default function TransferDetailsPage() {
         } else {
             router.replace('/login');
         }
-    }, [setAdmin, router, fetchAllUsers, verifyAdminSession, logout]);
+    }, [setAdmin, router, fetchAllUsers]);
 
     useEffect(() => {
         if (isSessionValid && users.length > 0) {

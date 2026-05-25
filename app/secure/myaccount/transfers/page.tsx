@@ -21,8 +21,6 @@ export default function TransfersPage() {
         users,
         fetchAllUsers,
         setAdmin,
-        verifyAdminSession,
-        logout
     } = useUser();
 
     const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
@@ -42,12 +40,6 @@ export default function TransfersPage() {
                 setIsSessionValid(true);
                 fetchAllUsers();
                 
-                verifyAdminSession().then(result => {
-                    if (!result.valid) {
-                        alert("Your session has expired. Please log in again.");
-                        logout();
-                    }
-                });
             } catch (e) {
                 console.error("Error parsing admin data", e);
                 router.replace('/login');
@@ -55,22 +47,8 @@ export default function TransfersPage() {
         } else {
             router.replace('/login');
         }
-    }, [setAdmin, router, fetchAllUsers, verifyAdminSession, logout]);
+    }, [setAdmin, router, fetchAllUsers]);
 
-    // Periodic session verification
-    useEffect(() => {
-        if (isSessionValid === true) {
-            const interval = setInterval(async () => {
-                const result = await verifyAdminSession();
-                if (!result.valid) {
-                    alert("Your session has expired. You have been logged out.");
-                    logout();
-                }
-            }, 60000);
-
-            return () => clearInterval(interval);
-        }
-    }, [isSessionValid, verifyAdminSession, logout]);
 
     useEffect(() => {
         if (isSessionValid === true && loggedInAdmin && Array.isArray(users)) {

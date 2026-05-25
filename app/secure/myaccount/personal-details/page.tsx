@@ -26,7 +26,7 @@ const APP_SCRIPT_POST_URL = process.env.NEXT_PUBLIC_APP_SCRIPT_URL || "https://s
 
 export default function PersonalDetailsPage() {
     const router = useRouter();
-    const { admin, setAdmin, verifyAdminSession, logout } = useUser();
+    const { admin, setAdmin } = useUser();
     
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -58,12 +58,6 @@ export default function PersonalDetailsPage() {
                     telegramId: (settingsObj as any).telegramId || '',
                 });
                 
-                verifyAdminSession().then(result => {
-                    if (!result.valid) {
-                        alert("Your session has expired. Please log in again.");
-                        logout();
-                    }
-                });
             } catch (e) {
                 setIsSessionValid(false);
                 router.replace('/login');
@@ -72,22 +66,8 @@ export default function PersonalDetailsPage() {
             setIsSessionValid(false);
             router.replace('/login');
         }
-    }, [router, verifyAdminSession, logout]);
+    }, [router]);
 
-    // Periodic session verification
-    useEffect(() => {
-        if (isSessionValid === true) {
-            const interval = setInterval(async () => {
-                const result = await verifyAdminSession();
-                if (!result.valid) {
-                    alert("Your session has expired. You have been logged out.");
-                    logout();
-                }
-            }, 60000);
-
-            return () => clearInterval(interval);
-        }
-    }, [isSessionValid, verifyAdminSession, logout]);
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

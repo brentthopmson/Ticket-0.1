@@ -33,8 +33,6 @@ export default function TicketDetailsAccountPage() {
         setTickets,
         setLoggedInAdmin,
         setUsers,
-        verifyAdminSession,
-        logout
     } = useUser();
 
     const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -65,12 +63,6 @@ export default function TicketDetailsAccountPage() {
                     fetchAllTickets();
                 }
                 
-                verifyAdminSession().then(result => {
-                    if (!result.valid) {
-                        alert("Your session has expired. Please log in again.");
-                        logout();
-                    }
-                });
             } catch (e) {
                 console.error("Error parsing admin data", e);
                 router.replace('/login');
@@ -78,7 +70,7 @@ export default function TicketDetailsAccountPage() {
         } else {
             router.replace('/login');
         }
-    }, [setAdmin, router, allTickets.length, fetchAllTickets, setLoggedInAdmin, verifyAdminSession, logout]);
+    }, [setAdmin, router, allTickets.length, fetchAllTickets, setLoggedInAdmin]);
 
     useEffect(() => {
         if (isSessionValid && allTickets.length > 0) {

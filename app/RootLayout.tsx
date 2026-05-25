@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faLock, faTicketAlt, faUser, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { UserProvider, useUser } from './UserContext';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 
 library.add(faPhone, faLock, faTicketAlt, faUser, faSearch);
@@ -20,23 +20,9 @@ export default function RootLayoutWrapper({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, verifyAdminSession, logout: sessionLogout } = useUser();
+  const { user } = useUser();
   const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Global session verification on mount and pathname change
-  useEffect(() => {
-    if (pathname.startsWith('/secure/myaccount') && !loading) {
-      const checkSession = async () => {
-        const result = await verifyAdminSession();
-        if (!result.valid) {
-          alert("Your session has expired. You have been logged out.");
-          sessionLogout();
-        }
-      };
-      checkSession();
-    }
-  }, [pathname, loading, verifyAdminSession, sessionLogout]);
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInAdmin");

@@ -22,19 +22,17 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // Auto-login via token from URL
+    const tokenParam = searchParams.get('token');
     useEffect(() => {
-        // If already logged in, redirect away from login page
         if (localStorage.getItem("adminToken")) {
             setRedirecting(true);
             setLoading(false);
             router.push('/secure/myaccount/tickets');
             return;
         }
-        const token = searchParams.get('token');
-        if (token) {
+        if (tokenParam) {
             setTokenLoggingIn(true);
-            loginWithToken(token).then(success => {
+            loginWithToken(tokenParam).then(success => {
                 setTokenLoggingIn(false);
                 if (success) {
                     setRedirecting(true);
@@ -44,7 +42,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ setLoggedInAdmin, setUsers }) =
                 }
             });
         }
-    }, [searchParams, loginWithToken, router, setLoading]);
+    }, [tokenParam, loginWithToken, router, setLoading]);
 
     useEffect(() => {
         setLoading(false);

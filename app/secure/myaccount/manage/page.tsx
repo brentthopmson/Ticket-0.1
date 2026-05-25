@@ -249,6 +249,7 @@ export default function ManageDashboard() {
                             onClick={() => {
                                 localStorage.removeItem("loggedInAdmin");
                                 localStorage.removeItem("adminData");
+                                localStorage.removeItem("adminToken");
                                 router.push('/login');
                             }}
                             className="w-full bg-[#1F1F1F] text-red-500 py-4 rounded-xl font-black text-sm uppercase tracking-widest border border-white/5 active:bg-red-500 active:text-white transition-all shadow-lg"

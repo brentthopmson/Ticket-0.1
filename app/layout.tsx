@@ -48,7 +48,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
         <link rel="apple-touch-icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <UserProvider>
           <RootLayoutWrapper inter={inter}>
             {children}

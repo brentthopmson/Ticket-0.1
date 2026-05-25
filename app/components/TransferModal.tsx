@@ -89,6 +89,7 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
             payload.append('userPlatform', 'ticketmaster');
             payload.append('sendType', 'auto');
             payload.append('note', formData.note);
+            payload.append('token', crypto.randomUUID());
 
             let paymentSettingsObj: any = null;
             if (applePayNumber || paypalLink || btcWallet || ethWallet || trcWallet || usdtWallet) {

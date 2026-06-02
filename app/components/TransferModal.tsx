@@ -119,7 +119,9 @@ export default function TransferModal({ isOpen, onClose, ticket }: TransferModal
                 body: payload.toString()
             });
 
+            console.log('TransferModal payload:', Object.fromEntries(payload.entries()));
             const result = await response.json();
+            console.log('TransferModal response:', result);
             if (result.success) {
                 fetchAllUsers();
                 setView('success');

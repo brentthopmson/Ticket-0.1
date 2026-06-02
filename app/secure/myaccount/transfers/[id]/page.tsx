@@ -30,21 +30,21 @@ export default function TransferDetailsPage() {
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
 
     useEffect(() => {
+        if (!localStorage.getItem("adminToken")) {
+            router.replace('/login');
+            return;
+        }
+        setIsSessionValid(true);
         const adminUsername = localStorage.getItem("loggedInAdmin");
         const adminData = localStorage.getItem('adminData');
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
-                setIsSessionValid(true);
                 fetchAllUsers();
-                
             } catch (e) {
                 console.error("Error parsing admin data", e);
-                router.replace('/login');
             }
-        } else {
-            router.replace('/login');
         }
     }, [setAdmin, router, fetchAllUsers]);
 

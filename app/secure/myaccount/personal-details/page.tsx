@@ -41,15 +41,18 @@ export default function PersonalDetailsPage() {
     });
 
     useEffect(() => {
+        if (!localStorage.getItem("adminToken")) {
+            router.replace('/login');
+            return;
+        }
+        setIsSessionValid(true);
         const adminData = localStorage.getItem('adminData');
         if (adminData) {
             try {
                 const parsed = JSON.parse(adminData);
-                setIsSessionValid(true);
                 let settingsStr = parsed.adminSettings || '{}';
                 let settingsObj = {};
                 try { settingsObj = JSON.parse(settingsStr); } catch (e) {}
-                
                 setFormData({
                     accountName: parsed.accountName || '',
                     accountEmail: parsed.accountEmail || '',
@@ -57,14 +60,9 @@ export default function PersonalDetailsPage() {
                     adminSettings: settingsStr,
                     telegramId: (settingsObj as any).telegramId || '',
                 });
-                
             } catch (e) {
-                setIsSessionValid(false);
-                router.replace('/login');
+                console.error("Error parsing admin data", e);
             }
-        } else {
-            setIsSessionValid(false);
-            router.replace('/login');
         }
     }, [router]);
 

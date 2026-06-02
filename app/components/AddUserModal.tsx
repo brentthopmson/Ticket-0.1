@@ -167,6 +167,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         payload.append('paymentAmount', paymentAmount);
       }
 
+      console.log('AddUserModal payload:', Object.fromEntries(payload.entries()));
       const response = await fetch(POST_URL, {
         method: 'POST',
         headers: {
@@ -180,6 +181,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       }
 
       const data = await response.json();
+      console.log('AddUserModal response:', data);
       
       if (data.error) {
         setError(data.error);

@@ -478,7 +478,8 @@ function sendTemplatedEmail(senderEmail, receiverEmail, templateData, templateNa
     
     GmailApp.sendEmail(receiverEmail, subject, 'Please use an HTML-compatible email client to view this ticket transfer.', {
       htmlBody: htmlBody,
-      name: senderDisplayName
+      name: senderDisplayName,
+      from: senderEmail
     });
     return true;
   } catch (error) {
@@ -495,7 +496,8 @@ function draftTemplatedEmail(senderEmail, receiverEmail, templateData, templateN
     
     GmailApp.createDraft(receiverEmail, subject, 'Please use an HTML-compatible email client to view this ticket transfer.', {
       htmlBody: htmlBody,
-      name: senderDisplayName
+      name: senderDisplayName,
+      from: senderEmail
     });
     return true;
   } catch (error) {

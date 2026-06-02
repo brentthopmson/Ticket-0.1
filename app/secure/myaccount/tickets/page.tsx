@@ -30,24 +30,27 @@ export default function MyTicketsPage() {
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
 
     useEffect(() => {
+        const adminToken = localStorage.getItem("adminToken");
+        if (!adminToken) {
+            router.replace('/login');
+            return;
+        }
+        setIsSessionValid(true);
         const adminUsername = localStorage.getItem("loggedInAdmin");
         const adminData = localStorage.getItem('adminData');
-    
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
                 setLoggedInAdmin(adminUsername);
                 setLocalAdmin(adminUsername);
-                setIsSessionValid(true);
                 fetchAllTickets();
-                
             } catch (e) {
                 console.error("Error parsing admin data", e);
-                router.replace('/login');
             }
-        } else {
-            router.replace('/login');
+        } else if (admin) {
+            setLocalAdmin(admin.username || admin.adminId);
+            fetchAllTickets();
         }
     }, [setAdmin, router, fetchAllTickets, setLoggedInAdmin]);
 

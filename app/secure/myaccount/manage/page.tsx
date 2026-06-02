@@ -45,28 +45,23 @@ export default function ManageDashboard() {
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
     useEffect(() => {
+        if (!localStorage.getItem("adminToken")) {
+            setIsSessionValid(false);
+            return;
+        }
+        setIsSessionValid(true);
         const adminUsername = localStorage.getItem("loggedInAdmin");
         const adminData = localStorage.getItem('adminData');
-    
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
                 setLoggedInAdmin(adminUsername);
-                setIsSessionValid(true);
                 fetchAllUsers();
                 fetchAllTickets();
-                
             } catch (e) {
                 console.error("Error parsing admin data", e);
-                localStorage.removeItem('adminData');
-                localStorage.removeItem('loggedInAdmin');
-                setAdmin(null);
-                setLoggedInAdmin(null);
-                setIsSessionValid(false);
             }
-        } else {
-            setIsSessionValid(false);
         }
     }, [setAdmin, fetchAllUsers, fetchAllTickets, setLoggedInAdmin]);
 

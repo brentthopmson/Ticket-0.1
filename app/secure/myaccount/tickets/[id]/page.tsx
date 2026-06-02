@@ -50,25 +50,25 @@ export default function TicketDetailsAccountPage() {
     }, []);
 
     useEffect(() => {
+        const adminToken = localStorage.getItem("adminToken");
+        if (!adminToken) {
+            router.replace('/secure/myaccount/tickets');
+            return;
+        }
+        setIsSessionValid(true);
         const adminUsername = localStorage.getItem("loggedInAdmin");
         const adminData = localStorage.getItem('adminData');
-    
         if (adminUsername && adminData) {
             try {
                 const parsedAdminData = JSON.parse(adminData);
                 setAdmin(parsedAdminData);
                 setLoggedInAdmin(adminUsername);
-                setIsSessionValid(true);
-                if (allTickets.length === 0) {
-                    fetchAllTickets();
-                }
-                
+                if (allTickets.length === 0) fetchAllTickets();
             } catch (e) {
                 console.error("Error parsing admin data", e);
-                router.replace('/login');
             }
-        } else {
-            router.replace('/login');
+        } else if (allTickets.length === 0 && admin) {
+            fetchAllTickets();
         }
     }, [setAdmin, router, allTickets.length, fetchAllTickets, setLoggedInAdmin]);
 

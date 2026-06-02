@@ -149,7 +149,7 @@ export default function Home() {
 
             {/* Global Bottom Nav - local copy for public home */}
             {isLoggedIn && (
-                <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center z-[100] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+                <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 pt-3 pb-6 flex justify-between items-center z-[100] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
                     <button onClick={() => router.push('/')} className={`flex flex-col items-center space-y-1 ${pathname === '/' ? 'text-[#026CDF]' : 'text-gray-400'}`}>
                         <FontAwesomeIcon icon={faSearch} className="text-xl" />
                         <span className="text-[10px] font-bold">Discover</span>

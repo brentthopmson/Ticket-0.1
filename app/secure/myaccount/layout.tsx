@@ -30,7 +30,7 @@ export default function MyAccountLayout({
         <div className="min-h-screen bg-black flex flex-col font-sans">
             {/* Shared Mobile Header - FIXED for app-like feel */}
             {!isDetailView && (
-                <header className="bg-[#1F1F1F] text-white px-4 pt-10 pb-4 fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-white/5 shadow-xl">
+                <header className="bg-[#1F1F1F] text-white px-4 h-[72px] fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-white/5 shadow-xl">
                     <div className="w-12">
                         {pathParts.length > 3 && !isTicketsList && !isTransfers && !isManage && (
                             <button onClick={() => router.back()} className="text-white hover:text-white/80 transition-colors">
@@ -70,12 +70,12 @@ export default function MyAccountLayout({
                 </header>
             )}
 
-            <div className={`flex-1 flex flex-col ${!isDetailView ? 'pt-[76px]' : ''}`}>
+            <div className={`flex-1 flex flex-col ${!isDetailView ? 'pt-[72px]' : ''}`}>
                 {children}
             </div>
 
             {/* Global Bottom Nav */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center z-[100] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 pt-3 pb-6 flex justify-between items-center z-[100] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
                 <button onClick={() => router.push('/')} className={`flex flex-col items-center space-y-1 ${pathname === '/' ? 'text-[#026CDF]' : 'text-gray-400'}`}>
                     <FontAwesomeIcon icon={faSearch} className="text-xl" />
                     <span className="text-[10px] font-bold">Discover</span>

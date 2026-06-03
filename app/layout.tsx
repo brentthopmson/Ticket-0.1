@@ -45,6 +45,7 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#026CDF" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Ticketmaster" />
         <link rel="apple-touch-startup-image" href="/splash-1024x1024.png" />

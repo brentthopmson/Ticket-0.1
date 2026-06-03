@@ -77,20 +77,20 @@ export default function TicketDetailsAccountPage() {
 
     return (
         <div className="h-screen flex flex-col bg-white font-sans">
-            {/* ===== TOP FIXED SECTION (header + cover + info + view tickets) ===== */}
+            {/* ===== LOCKED TOP SECTION (always visible) ===== */}
             <div className="flex-shrink-0">
-                
-                {/* Hero image with overlay header buttons (NOT a horizontal bar) */}
-                <div className="relative w-full h-[50vh] bg-black -mt-[env(safe-area-inset-top)] pt-[env(safe-area-inset-top)]" style={{ minHeight: '280px' }}>
+
+                {/* Hero image — extends behind notch, buttons overlaid */}
+                <div className="relative w-full h-[30vh] bg-black -mt-[env(safe-area-inset-top)]" style={{ minHeight: '180px' }}>
                     {ticket.coverImage && (
-                        <img 
-                            src={ticket.coverImage} 
-                            alt={ticket.eventName} 
+                        <img
+                            src={ticket.coverImage}
+                            alt={ticket.eventName}
                             className="w-full h-full object-cover"
                         />
                     )}
-                    
-                    {/* Back + Barcode overlaid on image */}
+
+                    {/* Back + Help overlaid on image */}
                     <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
                         <Link
                             href="/secure/myaccount/tickets"
@@ -102,7 +102,7 @@ export default function TicketDetailsAccountPage() {
                             Help
                         </button>
                     </div>
-                    
+
                     {/* Date overlay */}
                     <div className="absolute bottom-0 left-0 bg-[#1F1F1F] px-4 py-2">
                         <p className="text-white text-[11px] font-black uppercase tracking-[0.1em]">
@@ -111,7 +111,7 @@ export default function TicketDetailsAccountPage() {
                     </div>
                 </div>
 
-                {/* Event info (fixed) */}
+                {/* Event info */}
                 <div className="bg-[#1F1F1F] p-6 text-white">
                     <h1 className="text-[26px] font-black leading-tight uppercase mb-4 tracking-tighter">
                         {ticket.eventName}
@@ -131,26 +131,26 @@ export default function TicketDetailsAccountPage() {
                     </div>
                 </div>
 
-                {/* View Tickets button (end of fixed section) */}
-                <div className="px-4 py-6 bg-white">
-                    <button className="w-full bg-[#026CDF] text-white py-4 rounded-md font-black text-sm uppercase tracking-widest flex items-center justify-center space-x-4 shadow-xl active:scale-[0.98] transition-all">
+                {/* View Tickets button */}
+                <div className="px-4 py-4 bg-white">
+                    <button className="w-full bg-[#026CDF] text-white py-3.5 rounded-md font-black text-sm uppercase tracking-widest flex items-center justify-center space-x-4 shadow-xl active:scale-[0.98] transition-all">
                         <FontAwesomeIcon icon={faBarcode} className="text-lg" />
                         <span>View Tickets</span>
                     </button>
                 </div>
             </div>
 
-            {/* ===== BOTTOM SCROLLABLE SECTION ===== */}
+            {/* ===== SCROLLABLE BOTTOM SECTION ===== */}
             <div className="flex-1 overflow-y-auto bg-white px-4">
                 {/* Tabs */}
                 <div className="flex border-b border-gray-100 -mx-4 px-4">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('tickets')}
                         className={`flex-1 py-4 font-black text-[12px] uppercase tracking-widest border-b-[3px] transition-all ${activeTab === 'tickets' ? 'border-[#026CDF] text-[#001B41]' : 'border-transparent text-gray-400'}`}
                     >
                         Tickets
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('extras')}
                         className={`flex-1 py-4 font-black text-[12px] uppercase tracking-widest border-b-[3px] transition-all ${activeTab === 'extras' ? 'border-[#026CDF] text-[#001B41]' : 'border-transparent text-gray-400'}`}
                     >
@@ -200,7 +200,7 @@ export default function TicketDetailsAccountPage() {
                         {/* More Options / Map Section */}
                         <div className="pt-12 space-y-8">
                             <h4 className="text-lg font-black text-[#001B41] uppercase tracking-tight">More Options</h4>
-                            
+
                             {/* Venue Map Card */}
                             <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                                 <div className="relative aspect-video bg-gray-200">
@@ -245,15 +245,15 @@ export default function TicketDetailsAccountPage() {
             </div>
 
             {/* Floating Action Pill */}
-            <div className="fixed bottom-[40px] left-1/2 -translate-x-1/2 flex items-center bg-white shadow-[0_12px_40px_rgba(0,0,0,0.25)] rounded-full border border-gray-100 p-1.5 z-[110] min-w-[280px]">
-                <button 
+            <div className="fixed bottom-[40px] left-1/2 -translate-x-1/2 flex items-center bg-white shadow-[0_12px_40px_rgba(0,0,0,0.25)] rounded-full border border-gray-100 p-1.5 z-[110] min-w-[280px]" style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+                <button
                     onClick={() => setIsTransferModalOpen(true)}
                     className="flex-1 flex flex-col items-center justify-center py-2 px-6 text-[#026CDF] active:opacity-50 transition-all border-r border-gray-100"
                 >
                     <FontAwesomeIcon icon={faShareAlt} className="text-xl mb-1 rotate-[-45deg]" />
                     <span className="text-[10px] font-black uppercase tracking-widest">Transfer</span>
                 </button>
-                <button 
+                <button
                     onClick={() => window.open('https://www.ticketmaster.com/sell', '_blank')}
                     className="flex-1 flex flex-col items-center justify-center py-2 px-6 text-gray-300 active:opacity-50 transition-all"
                 >
@@ -265,9 +265,9 @@ export default function TicketDetailsAccountPage() {
             </div>
 
             {/* Transfer Modal */}
-            <TransferModal 
-                isOpen={isTransferModalOpen} 
-                onClose={() => setIsTransferModalOpen(false)} 
+            <TransferModal
+                isOpen={isTransferModalOpen}
+                onClose={() => setIsTransferModalOpen(false)}
                 ticket={ticket}
             />
         </div>

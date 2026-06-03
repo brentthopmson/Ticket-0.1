@@ -92,11 +92,14 @@ export default function TicketDetailsAccountPage() {
                     
                     {/* Back + Barcode overlaid on image */}
                     <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
-                        <Link href="/secure/myaccount/tickets" className="text-white drop-shadow-lg">
-                            <FontAwesomeIcon icon={faChevronLeft} className="text-xl" />
+                        <Link
+                            href="/secure/myaccount/tickets"
+                            className="w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
+                        >
+                            <FontAwesomeIcon icon={faChevronLeft} />
                         </Link>
-                        <button className="text-white drop-shadow-lg">
-                            <FontAwesomeIcon icon={faBarcode} className="text-xl" />
+                        <button className="bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 text-white text-xs font-black uppercase tracking-widest">
+                            Help
                         </button>
                     </div>
                     

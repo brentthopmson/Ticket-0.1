@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useUser } from '../../UserContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faSearch, 
@@ -11,6 +13,45 @@ import {
     faUser
 } from '@fortawesome/free-solid-svg-icons';
 
+const COUNTRY_CODES: Record<string, string> = {
+  'USA': 'us',
+  'SPAIN': 'es',
+  'UK': 'gb',
+  'FRANCE': 'fr',
+  'GERMANY': 'de',
+  'ITALY': 'it',
+  'CANADA': 'ca',
+  'MEXICO': 'mx',
+  'AUSTRALIA': 'au',
+  'BRAZIL': 'br',
+  'JAPAN': 'jp',
+  'CHINA': 'cn',
+  'INDIA': 'in',
+  'NIGERIA': 'ng',
+  'GHANA': 'gh',
+  'SOUTH AFRICA': 'za',
+  'ARGENTINA': 'ar',
+  'COLOMBIA': 'co',
+  'PORTUGAL': 'pt',
+  'NETHERLANDS': 'nl',
+  'SWITZERLAND': 'ch',
+  'SWEDEN': 'se',
+  'NORWAY': 'no',
+  'DENMARK': 'dk',
+  'FINLAND': 'fi',
+  'IRELAND': 'ie',
+  'POLAND': 'pl',
+  'TURKEY': 'tr',
+  'RUSSIA': 'ru',
+  'UAE': 'ae',
+  'SAUDI ARABIA': 'sa',
+  'EGYPT': 'eg',
+  'KENYA': 'ke',
+  'MOROCCO': 'ma',
+};
+
+const FLAG_BASE = 'https://flagcdn.com/w40';
+
 export default function MyAccountLayout({
   children,
 }: {
@@ -18,6 +59,22 @@ export default function MyAccountLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
+
+    const { admin } = useUser();
+    const [redirecting, setRedirecting] = useState(false);
+
+    // Auth guard — redirect to login if no adminToken
+    useEffect(() => {
+        if (!localStorage.getItem("adminToken")) {
+            setRedirecting(true);
+            router.replace('/login');
+        }
+    }, [router]);
+
+    if (redirecting) return null;
+    const country = admin?.accountCountry?.toUpperCase().trim() || '';
+    const countryCode = COUNTRY_CODES[country] || '';
+    const flagUrl = countryCode ? `${FLAG_BASE}/${countryCode}.png` : '';
 
     const pathParts = pathname.split('/').filter(Boolean);
     const isDetailView = pathParts.length > 3;
@@ -43,16 +100,8 @@ export default function MyAccountLayout({
                         <h1 className="text-base font-bold text-white">
                             {isTicketsList ? 'My Events' : isTransfers ? 'Transfers' : 'My Account'}
                         </h1>
-                        {isTicketsList && (
-                            <div className="w-6 h-4 bg-white rounded-sm overflow-hidden border border-white/20 scale-75">
-                                <div className="absolute inset-0 bg-[#002868]"></div>
-                                <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-[#bf0a30]"></div>
-                                <div className="absolute top-0 left-0 w-full h-full flex flex-col space-y-[0.5px]">
-                                    {[...Array(7)].map((_, i) => (
-                                        <div key={i} className={`h-[0.5px] w-full ${i % 2 === 0 ? 'bg-[#bf0a30]' : 'bg-white'}`}></div>
-                                    ))}
-                                </div>
-                            </div>
+                        {isTicketsList && flagUrl && (
+                            <img src={flagUrl} alt={country} className="w-5 h-3.5 rounded-sm object-cover" />
                         )}
                     </div>
 
@@ -75,6 +124,7 @@ export default function MyAccountLayout({
             </div>
 
             {/* Global Bottom Nav */}
+            {!isDetailView && (
             <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 pt-3 pb-6 flex justify-between items-center z-[100] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
                 <button onClick={() => router.push('/')} className={`flex flex-col items-center space-y-1 ${pathname === '/' ? 'text-[#026CDF]' : 'text-gray-400'}`}>
                     <FontAwesomeIcon icon={faSearch} className="text-xl" />
@@ -93,6 +143,7 @@ export default function MyAccountLayout({
                     <span className="text-[10px] font-bold">My Account</span>
                 </button>
             </nav>
+            )}
         </div>
     );
 }

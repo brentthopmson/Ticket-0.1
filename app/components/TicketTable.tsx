@@ -83,7 +83,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
 
   return (
     <>
-      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <section className="bg-[#1F1F1F] p-6 rounded-2xl shadow-2xl border border-white/5">
         <div className="flex flex-col md:flex-row justify-end items-start md:items-center mb-6 gap-4">
           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
             <div className="w-full sm:w-64">
@@ -92,7 +92,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
                 placeholder="Search tickets..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                className="w-full p-3 pl-10 bg-white/5 border border-white/5 rounded-xl text-white placeholder-white/20 font-bold text-xs outline-none focus:bg-white/10 transition-all"
               />
             </div>
             <button
@@ -107,27 +107,27 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
         
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
-            <thead className="bg-gray-50">
+            <thead className="bg-white/5">
               <tr>
-                <th className="border p-2 text-sm text-left">Event Name</th>
-                <th className="border p-2 text-sm text-left">Venue</th>
-                <th className="border p-2 text-sm text-left hidden md:table-cell">Date & Time</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">Section</th>
-                <th className="border p-2 text-sm text-left hidden lg:table-cell">Row</th>
-                <th className="border p-2 text-sm text-center">Actions</th>
+                <th className="px-6 py-4 text-sm text-left font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Event Name</th>
+                <th className="px-6 py-4 text-sm text-left font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Venue</th>
+                <th className="px-6 py-4 text-sm text-left font-medium text-white/40 uppercase tracking-widest text-[10px] font-black hidden md:table-cell">Date & Time</th>
+                <th className="px-6 py-4 text-sm text-left font-medium text-white/40 uppercase tracking-widest text-[10px] font-black hidden lg:table-cell">Section</th>
+                <th className="px-6 py-4 text-sm text-left font-medium text-white/40 uppercase tracking-widest text-[10px] font-black hidden lg:table-cell">Row</th>
+                <th className="px-6 py-4 text-sm text-center font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredTickets.map(ticket => (
-                <tr key={ticket.ticketId} className="hover:bg-gray-50">
-                  <td className="border p-2 text-sm">{ticket.eventName}</td>
-                  <td className="border p-2 text-sm">{ticket.venue}</td>
-                  <td className="border p-2 text-sm hidden md:table-cell">
+                <tr key={ticket.ticketId} className="hover:bg-white/5 transition-colors">
+                  <td className="px-6 py-4 text-sm text-white/60 border-b border-white/5">{ticket.eventName}</td>
+                  <td className="px-6 py-4 text-sm text-white/60 border-b border-white/5">{ticket.venue}</td>
+                  <td className="px-6 py-4 text-sm text-white/60 border-b border-white/5 hidden md:table-cell">
                     {new Date(ticket.dateTime).toLocaleString()}
                   </td>
-                  <td className="border p-2 text-sm hidden lg:table-cell">{ticket.section} {ticket.sectionNo}</td>
-                  <td className="border p-2 text-sm hidden lg:table-cell">{ticket.row}</td>
-                  <td className="border p-2 text-sm">
+                  <td className="px-6 py-4 text-sm text-white/60 border-b border-white/5 hidden lg:table-cell">{ticket.section} {ticket.sectionNo}</td>
+                  <td className="px-6 py-4 text-sm text-white/60 border-b border-white/5 hidden lg:table-cell">{ticket.row}</td>
+                  <td className="px-6 py-4 text-sm border-b border-white/5">
                     <div className="flex items-center justify-center space-x-3">
                       <button
                         onClick={() => handleUpdateTicket(ticket)}
@@ -139,7 +139,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
                       </button>
                       <button
                         onClick={() => handleDeleteTicket(ticket.ticketId)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-500 hover:text-white transition-colors"
                         title="Delete Ticket"
                         disabled={isDeleting === ticket.ticketId}
                       >
@@ -158,7 +158,7 @@ const TicketTable: React.FC<TicketTableProps> = ({ tickets, users, onTicketsChan
         </div>
         
         {filteredTickets.length === 0 && (
-          <div className="text-center py-4 text-gray-500 font-bold">
+          <div className="text-center py-12 text-white/40 font-bold text-sm">
             No tickets found matching your search criteria.
           </div>
         )}

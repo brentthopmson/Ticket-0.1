@@ -38,22 +38,12 @@ export default function TicketDetailsAccountPage() {
     const [ticket, setTicket] = useState<Ticket | null>(null);
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
     const [activeTab, setActiveTab] = useState<'tickets' | 'extras'>('tickets');
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 200);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     useEffect(() => {
         const adminToken = localStorage.getItem("adminToken");
         if (!adminToken) {
-            router.replace('/secure/myaccount/tickets');
-            return;
+            return void router.replace('/login');
         }
         setIsSessionValid(true);
         const adminUsername = localStorage.getItem("loggedInAdmin");
@@ -86,83 +76,71 @@ export default function TicketDetailsAccountPage() {
     const seats = ticket.seatNumbers ? ticket.seatNumbers.split(',').map(s => s.trim()) : [ticket.seat || '1'];
 
     return (
-        <div className="min-h-screen bg-white flex flex-col font-sans pb-[120px]">
-            {/* Dynamic Header */}
-            <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex items-center justify-between px-4 py-4 ${scrolled ? 'bg-[#1F1F1F] text-white shadow-xl' : 'bg-transparent text-white'}`}>
-                <div className="flex items-center space-x-3 overflow-hidden">
-                    <Link 
-                        href="/secure/myaccount/tickets"
-                        className={`w-10 h-10 flex items-center justify-center transition-all ${scrolled ? 'text-white' : 'bg-black/40 rounded-full'}`}
-                    >
-                        <FontAwesomeIcon icon={faChevronLeft} />
-                    </Link>
-                    {scrolled && (
-                        <div className="animate-in slide-in-from-left-2 duration-300 truncate">
-                            <h2 className="text-xs font-black uppercase tracking-tight truncate max-w-[200px]">{ticket.eventName}</h2>
-                            <p className="text-[10px] font-bold text-white/40 truncate">{ticket.venue}, {ticket.location}</p>
-                        </div>
-                    )}
-                </div>
+        <div className="h-screen flex flex-col bg-white font-sans">
+            {/* ===== TOP FIXED SECTION (header + cover + info + view tickets) ===== */}
+            <div className="flex-shrink-0">
                 
-                <div className="flex items-center space-x-2">
-                    {scrolled ? (
-                        <button className="w-10 h-10 bg-[#026CDF] rounded-md flex items-center justify-center text-white">
-                            <FontAwesomeIcon icon={faBarcode} />
-                        </button>
-                    ) : (
-                        <button className="bg-black/40 px-4 py-2 rounded-full text-white text-xs font-black uppercase tracking-widest backdrop-blur-sm">
-                            Help
-                        </button>
+                {/* Hero image with overlay header buttons (NOT a horizontal bar) */}
+                <div className="relative w-full h-[50vh] bg-black -mt-[env(safe-area-inset-top)] pt-[env(safe-area-inset-top)]" style={{ minHeight: '280px' }}>
+                    {ticket.coverImage && (
+                        <img 
+                            src={ticket.coverImage} 
+                            alt={ticket.eventName} 
+                            className="w-full h-full object-cover"
+                        />
                     )}
+                    
+                    {/* Back + Barcode overlaid on image */}
+                    <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
+                        <Link href="/secure/myaccount/tickets" className="text-white drop-shadow-lg">
+                            <FontAwesomeIcon icon={faChevronLeft} className="text-xl" />
+                        </Link>
+                        <button className="text-white drop-shadow-lg">
+                            <FontAwesomeIcon icon={faBarcode} className="text-xl" />
+                        </button>
+                    </div>
+                    
+                    {/* Date overlay */}
+                    <div className="absolute bottom-0 left-0 bg-[#1F1F1F] px-4 py-2">
+                        <p className="text-white text-[11px] font-black uppercase tracking-[0.1em]">
+                            {ticket.dateTime || 'FRI • JUL 17, 2026 • 7:30 PM'}
+                        </p>
+                    </div>
                 </div>
-            </header>
 
-            {/* Hero Image Section */}
-            <div className="relative w-full aspect-[4/5] bg-black">
-                {ticket.coverImage && (
-                    <img 
-                        src={ticket.coverImage} 
-                        alt={ticket.eventName} 
-                        className="w-full h-full object-cover"
-                    />
-                )}
-                {/* Hero Overlay - Black Bar for Date */}
-                <div className="absolute bottom-0 left-0 bg-[#1F1F1F] px-4 py-2">
-                    <p className="text-white text-[11px] font-black uppercase tracking-[0.1em]">
-                        {ticket.dateTime || 'FRI • JUL 17, 2026 • 7:30 PM'}
-                    </p>
+                {/* Event info (fixed) */}
+                <div className="bg-[#1F1F1F] p-6 text-white">
+                    <h1 className="text-[26px] font-black leading-tight uppercase mb-4 tracking-tighter">
+                        {ticket.eventName}
+                    </h1>
+                    <div className="flex justify-between items-end">
+                        <div className="space-y-1">
+                            <p className="text-sm font-bold text-white/60">{ticket.venue}</p>
+                            <p className="text-sm font-bold text-white/60">{ticket.location}</p>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                            <svg className="w-4 h-4 text-white/40" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M0 6a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H2a2 2 0 01-2-2V6z" />
+                                <path d="M14 4h4a2 2 0 012 2v8a2 2 0 01-2 2h-4V4z" />
+                            </svg>
+                            <span className="text-xs font-black">x{seats.length}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* View Tickets button (end of fixed section) */}
+                <div className="px-4 py-6 bg-white">
+                    <button className="w-full bg-[#026CDF] text-white py-4 rounded-md font-black text-sm uppercase tracking-widest flex items-center justify-center space-x-4 shadow-xl active:scale-[0.98] transition-all">
+                        <FontAwesomeIcon icon={faBarcode} className="text-lg" />
+                        <span>View Tickets</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Event Header Section */}
-            <div className="bg-[#1F1F1F] p-6 text-white">
-                <h1 className="text-[26px] font-black leading-tight uppercase mb-4 tracking-tighter">
-                    {ticket.eventName}
-                </h1>
-                <div className="flex justify-between items-end">
-                    <div className="space-y-1">
-                        <p className="text-sm font-bold text-white/60">{ticket.venue}</p>
-                        <p className="text-sm font-bold text-white/60">{ticket.location}</p>
-                    </div>
-                    <div className="flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
-                        <svg className="w-4 h-4 text-white/40" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M0 6a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H2a2 2 0 01-2-2V6z" />
-                            <path d="M14 4h4a2 2 0 012 2v8a2 2 0 01-2 2h-4V4z" />
-                        </svg>
-                        <span className="text-xs font-black">x{seats.length}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Big Action Button */}
-            <div className="px-4 py-6 bg-white">
-                <button className="w-full bg-[#026CDF] text-white py-4 rounded-md font-black text-sm uppercase tracking-widest flex items-center justify-center space-x-4 shadow-xl active:scale-[0.98] transition-all">
-                    <FontAwesomeIcon icon={faBarcode} className="text-lg" />
-                    <span>View Tickets</span>
-                </button>
-
+            {/* ===== BOTTOM SCROLLABLE SECTION ===== */}
+            <div className="flex-1 overflow-y-auto bg-white px-4">
                 {/* Tabs */}
-                <div className="flex mt-8 border-b border-gray-100">
+                <div className="flex border-b border-gray-100 -mx-4 px-4">
                     <button 
                         onClick={() => setActiveTab('tickets')}
                         className={`flex-1 py-4 font-black text-[12px] uppercase tracking-widest border-b-[3px] transition-all ${activeTab === 'tickets' ? 'border-[#026CDF] text-[#001B41]' : 'border-transparent text-gray-400'}`}
@@ -179,7 +157,7 @@ export default function TicketDetailsAccountPage() {
 
                 {/* Ticket Details List */}
                 {activeTab === 'tickets' && (
-                    <div className="mt-6 space-y-8 animate-in fade-in duration-500">
+                    <div className="mt-6 space-y-8 animate-in fade-in duration-500 pb-[120px]">
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg font-black text-[#001B41]">Order #{ticket.ticketId.toUpperCase()}</h3>
@@ -222,16 +200,25 @@ export default function TicketDetailsAccountPage() {
                             
                             {/* Venue Map Card */}
                             <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                                <div className="relative aspect-video">
-                                    <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=1000" alt="Map" className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/10"></div>
-                                    <div className="absolute top-4 left-4">
-                                        <h5 className="text-lg font-black text-[#1F1F1F] drop-shadow-md">{ticket.venue}</h5>
+                                <div className="relative aspect-video bg-gray-200">
+                                    <iframe
+                                        title="Venue Map"
+                                        loading="lazy"
+                                        className="w-full h-full absolute inset-0"
+                                        src={`https://www.google.com/maps?q=${encodeURIComponent(ticket.venue + ' ' + ticket.location)}&output=embed`}
+                                    />
+                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow">
+                                        <h5 className="text-sm font-black text-[#1F1F1F]">{ticket.venue}</h5>
                                     </div>
                                 </div>
-                                <button className="w-full bg-[#F0F2F5] py-4 text-sm font-black text-[#001B41] uppercase tracking-widest hover:bg-gray-200 transition-colors">
+                                <a
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ticket.venue + ' ' + ticket.location)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full bg-[#F0F2F5] py-4 text-sm font-black text-[#001B41] uppercase tracking-widest hover:bg-gray-200 transition-colors text-center"
+                                >
                                     Get Directions
-                                </button>
+                                </a>
                             </div>
 
                             {/* Social Share Card */}

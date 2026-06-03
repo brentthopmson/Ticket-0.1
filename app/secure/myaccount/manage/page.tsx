@@ -26,6 +26,45 @@ import {
     faUsers
 } from '@fortawesome/free-solid-svg-icons';
 
+const COUNTRY_CODES: Record<string, string> = {
+  'USA': 'us',
+  'SPAIN': 'es',
+  'UK': 'gb',
+  'FRANCE': 'fr',
+  'GERMANY': 'de',
+  'ITALY': 'it',
+  'CANADA': 'ca',
+  'MEXICO': 'mx',
+  'AUSTRALIA': 'au',
+  'BRAZIL': 'br',
+  'JAPAN': 'jp',
+  'CHINA': 'cn',
+  'INDIA': 'in',
+  'NIGERIA': 'ng',
+  'GHANA': 'gh',
+  'SOUTH AFRICA': 'za',
+  'ARGENTINA': 'ar',
+  'COLOMBIA': 'co',
+  'PORTUGAL': 'pt',
+  'NETHERLANDS': 'nl',
+  'SWITZERLAND': 'ch',
+  'SWEDEN': 'se',
+  'NORWAY': 'no',
+  'DENMARK': 'dk',
+  'FINLAND': 'fi',
+  'IRELAND': 'ie',
+  'POLAND': 'pl',
+  'TURKEY': 'tr',
+  'RUSSIA': 'ru',
+  'UAE': 'ae',
+  'SAUDI ARABIA': 'sa',
+  'EGYPT': 'eg',
+  'KENYA': 'ke',
+  'MOROCCO': 'ma',
+};
+
+const FLAG_BASE = 'https://flagcdn.com/w40';
+
 export default function ManageDashboard() {
     const router = useRouter();
     const { 
@@ -43,6 +82,9 @@ export default function ManageDashboard() {
     const [activeTab, setActiveTab] = useState<'transfers' | 'tickets' | 'account' | 'management'>('account');
     const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const country = admin?.accountCountry?.toUpperCase().trim() || '';
+    const countryCode = COUNTRY_CODES[country] || '';
+    const flagUrl = countryCode ? `${FLAG_BASE}/${countryCode}.png` : '';
 
     useEffect(() => {
         if (!localStorage.getItem("adminToken")) {
@@ -91,26 +133,26 @@ export default function ManageDashboard() {
     }
 
     const SectionHeader = ({ title }: { title: string }) => (
-        <h3 className="px-5 py-3 text-[15px] font-black text-[#1F1F1F] bg-gray-50">{title}</h3>
+        <h3 className="px-5 py-3 text-[15px] font-black text-white/40 bg-[#1F1F1F]">{title}</h3>
     );
 
     const MenuItem = ({ icon, label, rightElement, action }: { icon?: any, label: string, rightElement?: React.ReactNode, action?: () => void }) => (
         <button 
             onClick={action}
-            className="w-full flex items-center justify-between p-5 bg-white border-b border-gray-100 last:border-none active:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between p-5 bg-[#1F1F1F] border-b border-white/5 last:border-none active:bg-white/5 transition-colors"
         >
             <div className="flex items-center space-x-4">
-                {icon && <FontAwesomeIcon icon={icon} className="text-gray-400 text-lg w-6" />}
-                <span className="text-[15px] font-bold text-[#1F1F1F]">{label}</span>
+                {icon && <FontAwesomeIcon icon={icon} className="text-white/20 text-lg w-6" />}
+                <span className="text-[15px] font-bold text-white">{label}</span>
             </div>
             <div className="flex items-center space-x-2">
-                {rightElement || <FontAwesomeIcon icon={faChevronRight} className="text-gray-300 text-xs" />}
+                {rightElement || <FontAwesomeIcon icon={faChevronRight} className="text-white/20 text-xs" />}
             </div>
         </button>
     );
 
     return (
-        <div className="flex-1 flex flex-col bg-gray-50 min-h-full pb-32">
+        <div className="flex-1 flex flex-col bg-[#1F1F1F] min-h-full pb-32">
             
             {activeTab !== 'account' && (
                 <div className="bg-[#1F1F1F] p-4 border-b border-white/5 flex flex-col md:flex-row justify-between items-center sticky top-0 z-40">
@@ -160,7 +202,7 @@ export default function ManageDashboard() {
                     {/* Notifications Section */}
                     <div className="mt-[-1px]">
                         <SectionHeader title="Notifications" />
-                        <div className="bg-white">
+                        <div className="bg-[#1F1F1F]">
                             <MenuItem icon={faEnvelope} label="My Notifications" />
                             <MenuItem 
                                 icon={faBell} 
@@ -180,13 +222,13 @@ export default function ManageDashboard() {
                     {/* Location Settings Section */}
                     <div>
                         <SectionHeader title="Location Settings" />
-                        <div className="bg-white">
+                        <div className="bg-[#1F1F1F]">
                             <MenuItem 
                                 icon={faLocationDot} 
                                 label="My Location" 
                                 rightElement={
                                     <div className="flex items-center space-x-2">
-                                        <span className="text-[#026CDF] font-bold text-sm">Texas</span>
+                                        <span className="text-[#026CDF] font-bold text-sm">{admin?.accountState || 'N/A'}</span>
                                         <FontAwesomeIcon icon={faEdit} className="text-[#026CDF] text-xs" />
                                     </div>
                                 }
@@ -196,16 +238,8 @@ export default function ManageDashboard() {
                                 label="My Country" 
                                 rightElement={
                                     <div className="flex items-center space-x-2">
-                                        <div className="w-5 h-3.5 bg-white rounded-[2px] overflow-hidden border border-gray-100 flex flex-col space-y-[0.5px] scale-125 mr-2">
-                                            <div className="absolute inset-0 bg-[#002868]"></div>
-                                            <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-[#bf0a30]"></div>
-                                            <div className="absolute top-0 left-0 w-full h-full flex flex-col space-y-[0.5px]">
-                                                {[...Array(7)].map((_, i) => (
-                                                    <div key={i} className={`h-[0.5px] w-full ${i % 2 === 0 ? 'bg-[#bf0a30]' : 'bg-white'}`}></div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <span className="text-[#026CDF] font-bold text-sm">United States</span>
+                                        {flagUrl && <img src={flagUrl} alt={country} className="w-5 h-3.5 rounded-sm object-cover" />}
+                                        <span className="text-[#026CDF] font-bold text-sm">{admin?.accountCountry || 'N/A'}</span>
                                         <FontAwesomeIcon icon={faEdit} className="text-[#026CDF] text-xs" />
                                     </div>
                                 }
@@ -216,8 +250,8 @@ export default function ManageDashboard() {
 
                     {/* More Settings */}
                     <div>
-                        <SectionHeader title="Notifications" />
-                        <div className="bg-white">
+                        <SectionHeader title="More" />
+                        <div className="bg-[#1F1F1F]">
                             <MenuItem icon={faHeart} label="My Favourites" />
                             <MenuItem icon={faCreditCard} label="Saved Payment Methods" />
                             <MenuItem icon={faMobileAlt} label="Change App Icon" />
@@ -227,7 +261,7 @@ export default function ManageDashboard() {
                     {/* Help & Guidance */}
                     <div>
                         <SectionHeader title="Help & Guidance" />
-                        <div className="bg-white">
+                        <div className="bg-[#1F1F1F]">
                             <MenuItem 
                                 icon={faQuestionCircle} 
                                 label="Need Help" 

@@ -88,48 +88,48 @@ const SubAdminTable: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="p-8 text-center"><FontAwesomeIcon icon={faSpinner} spin className="text-3xl text-gray-400" /></div>;
+        return <div className="p-8 text-center"><FontAwesomeIcon icon={faSpinner} spin className="text-3xl text-white/20" /></div>;
     }
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-[#1F1F1F] rounded-2xl shadow-2xl border border-white/5 overflow-hidden">
             <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="min-w-full divide-y divide-white/5">
+                    <thead className="bg-white/5">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Account</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Plan</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expiry Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Account</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Plan</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Expiry Date</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-widest text-[10px] font-black">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className="divide-y divide-white/5">
                         {admins.map((admin) => (
                             <tr key={admin.adminId}>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{admin.accountName}</div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">{admin.accountEmail}</div>
-                                    <div className="text-xs text-gray-400 dark:text-gray-500">ID: {admin.adminId}</div>
+                                    <div className="text-sm font-medium text-white">{admin.accountName}</div>
+                                    <div className="text-sm text-white/30">{admin.accountEmail}</div>
+                                    <div className="text-xs text-white/10">ID: {admin.adminId}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
                                         {admin.plan}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${admin.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${admin.status === 'ACTIVE' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
                                         <FontAwesomeIcon icon={admin.status === 'ACTIVE' ? faCheckCircle : faExclamationCircle} className="mr-1 mt-0.5" />
                                         {admin.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                                     {editingAdmin === admin.adminId ? (
                                         <input
                                             type="datetime-local"
                                             value={newExpiryDate}
                                             onChange={(e) => setNewExpiryDate(e.target.value)}
-                                            className="border rounded p-1 text-sm text-black"
+                                            className="border rounded p-1 text-sm text-white bg-white/5 border-white/5 outline-none focus:bg-white/10"
                                         />
                                     ) : (
                                         admin.subscriptionExpiry
@@ -140,14 +140,14 @@ const SubAdminTable: React.FC = () => {
                                         <div className="flex space-x-2">
                                             <button
                                                 onClick={() => handleUpdateExpiry(admin.adminId)}
-                                                className="text-green-600 hover:text-green-900"
+                                                className="text-green-500 hover:text-white transition-colors"
                                                 disabled={actionLoading === `update-${admin.adminId}`}
                                             >
                                                 {actionLoading === `update-${admin.adminId}` ? <FontAwesomeIcon icon={faSpinner} spin /> : 'Save'}
                                             </button>
                                             <button
                                                 onClick={() => setEditingAdmin(null)}
-                                                className="text-gray-600 hover:text-gray-900"
+                                                className="text-white/40 hover:text-white transition-colors"
                                             >
                                                 Cancel
                                             </button>
@@ -156,13 +156,13 @@ const SubAdminTable: React.FC = () => {
                                         <>
                                             <button
                                                 onClick={() => { setEditingAdmin(admin.adminId); setNewExpiryDate(admin.subscriptionExpiry); }}
-                                                className="text-indigo-600 hover:text-indigo-900 mr-3"
+                                                className="text-[#026CDF] hover:text-white transition-colors"
                                             >
                                                 <FontAwesomeIcon icon={faEdit} className="mr-1" /> Edit
                                             </button>
                                             <button
                                                 onClick={() => handleNotifyExpiry(admin.adminId)}
-                                                className="text-yellow-600 hover:text-yellow-900"
+                                                className="text-amber-500 hover:text-white transition-colors"
                                                 disabled={actionLoading === `notify-${admin.adminId}`}
                                             >
                                                 {actionLoading === `notify-${admin.adminId}` ? <FontAwesomeIcon icon={faSpinner} spin /> : <><FontAwesomeIcon icon={faBell} className="mr-1" /> Notify</>}
@@ -174,7 +174,7 @@ const SubAdminTable: React.FC = () => {
                         ))}
                         {admins.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colSpan={5} className="px-6 py-4 text-center text-sm text-white/40">
                                     No customer admins found.
                                 </td>
                             </tr>

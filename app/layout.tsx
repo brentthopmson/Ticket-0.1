@@ -21,10 +21,10 @@ export const metadata = {
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
   icons: {
     icon: [
-      { url: 'https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png' },
+      { url: 'https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no' },
     ],
-    shortcut: 'https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png',
-    apple: 'https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png',
+    shortcut: 'https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no',
+    apple: 'https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no',
   },
   openGraph: {
     url: 'https://www.ticketmaster.com/',
@@ -48,9 +48,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Ticketmaster" />
         <link rel="apple-touch-startup-image" href="/splash-1024x1024.png" />
-        <link rel="icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
-        <link rel="shortcut icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
-        <link rel="apple-touch-icon" href="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" />
+        <link rel="icon" href="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no" />
+        <link rel="shortcut icon" href="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no" />
+        <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no" />
         <style>{`
           body {
             padding-top: env(safe-area-inset-top);
@@ -74,23 +74,10 @@ export default function RootLayout({
             width: 80px; height: 80px; border-radius: 50%;
           }
         `}</style>
-        <script dangerouslySetInnerHTML={{__html: `
-          (function() {
-            function hide() {
-              var el = document.getElementById('splash-screen');
-              if (el) el.classList.add('hidden');
-            }
-            if (document.readyState === 'complete' || document.readyState === 'interactive') {
-              hide();
-            } else {
-              document.addEventListener('DOMContentLoaded', hide);
-            }
-          })();
-        `}} />
       </head>
       <body className={inter.className}>
-        <div id="splash-screen">
-          <img src="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png" alt="" />
+        <div id="splash-screen" suppressHydrationWarning>
+          <img src="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no" alt="" />
         </div>
         <HideSplash />
         <UserProvider>

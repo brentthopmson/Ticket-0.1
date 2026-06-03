@@ -94,16 +94,19 @@ async function cacheFirst(request, cacheName) {
 }
 
 async function networkFirstWithCache(request, cacheName) {
+  const isGet = request.method === 'GET';
   try {
     const response = await fetch(request);
-    if (response.ok || response.type === 'opaqueredirect') {
+    if (isGet && (response.ok || response.type === 'opaqueredirect')) {
       const c = await caches.open(cacheName);
       c.put(request, response.clone());
     }
     return response;
   } catch {
-    const cached = await caches.open(cacheName).then((c) => c.match(request));
-    if (cached) return cached;
+    if (isGet) {
+      const cached = await caches.open(cacheName).then((c) => c.match(request));
+      if (cached) return cached;
+    }
     if (request.mode === 'navigate') {
       const fallback = await caches.open(PAGE_CACHE).then((c) => c.match('/login'));
       if (fallback) return fallback;

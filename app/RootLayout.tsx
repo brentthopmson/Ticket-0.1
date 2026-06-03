@@ -84,7 +84,7 @@ export default function RootLayoutWrapper({
               {/* Logo */}
               <Link href="/" className="flex items-center">
                 <Image
-                  src="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png"
+                  src="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no"
                   alt="Ticketmaster"
                   width={40}
                   height={40}
@@ -93,7 +93,7 @@ export default function RootLayoutWrapper({
                 />
                 <div className="text-white font-black text-2xl hidden sm:flex items-center">
                   <Image
-                    src="https://business.ticketmaster.be/nl/wp-content/uploads/sites/2/2025/05/logo.png"
+                    src="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no"
                     alt="Ticketmaster"
                     width={32}
                     height={32}

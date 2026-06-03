@@ -52,9 +52,10 @@ export default function RootLayout({
         <link rel="shortcut icon" href="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no" />
         <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/a-/ALV-UjXmI_R6mr2s1KnPXx7t5KhgAe9drmgY8So16bDQ9clqysQp-jQ=s300-p-k-rw-no" />
         <style>{`
+          html { background: #1F1F1F; }
           body {
-            padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
+            overscroll-behavior: none;
           }
           header.fixed {
             padding-top: env(safe-area-inset-top);

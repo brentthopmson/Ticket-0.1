@@ -16,10 +16,14 @@
   }
 }
 
+html {
+  background: #1F1F1F;
+}
 body {
   color: rgb(var(--foreground-rgb));
-  background: black;
+  background: #1F1F1F;
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 /* Spinner styles */

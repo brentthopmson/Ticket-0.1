@@ -83,7 +83,7 @@ export default function TicketDetails() {
               user.systemStatus === "RETRACTED" ||
               user.systemStatus === "CANCELLED"
           ) {
-              router.push("/invalid");
+              router.push(`/invalid?platform=${user.userPlatform || 'ticketmaster'}`);
               return;
           }
   

@@ -1,29 +1,84 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: 'Open Sans', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 4px; border: 1px solid #e1e1e1; overflow: hidden; }
-        .header { background-color: #026CDF; padding: 25px 20px; }
-        .header img { height: 30px; }
-        .body { padding: 40px 30px; color: #1f262d; }
-        .title { font-size: 24px; font-weight: 700; color: #dc3545; margin-bottom: 20px; }
-        .info-box { border: 1px solid #e1e1e1; border-radius: 8px; padding: 20px; background-color: #fdf2f2; }
-        .footer { padding: 20px; font-size: 12px; color: #666; background-color: #f9f9f9; border-top: 1px solid #e1e1e1; }
-    </style>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 </head>
+
 <body>
-    <div class="container">
-        <div class="header"><img src="https://g.ticketmaster.com/tm_logo_white.png" alt="Ticketmaster"></div>
-        <div class="body">
-            <h1 class="title">Transfer Declined</h1>
-            <p>The ticket transfer for <strong><?= templateData.eventName ?></strong> has been declined.</p>
-            <div class="info-box">
-                <p style="margin:0;">The tickets have been returned to <strong><?= templateData.senderName ?></strong>. If you didn't mean to decline, please contact the sender directly.</p>
-            </div>
-        </div>
-        <div class="footer"><p>© Ticketmaster 2026. All rights reserved.</p></div>
+    <div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF"
+            style="font-family:-apple-system, 'helvetica neue'; font-size:16px; color:rgb(49,49,49);">
+            <tbody>
+                <tr>
+                    <td align="center">
+                        <table width="480" cellspacing="0" cellpadding="0" border="0">
+                            <tbody>
+                                <tr>
+                                    <td width="480" align="center">
+                                        <table width="100%" cellspacing="0" cellpadding="0" border="0"
+                                            bgcolor="#024DDF">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="center" style="padding: 30px 20px 20px;">
+                                                        <img src="https://image.email.ticketmaster.com/lib/fe8c137277660c7470/m/1/ticketmaster_logo_white_retina.png"
+                                                            alt="Ticketmaster" width="140" height="auto" border="0">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f7f8f9"
+                                            style="padding: 20px; text-align: center;">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="font-size: 20px; font-weight: bold; color: #333;">Ticket
+                                                        Transfer Declined</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 16px; padding: 15px 0; color: #555;">
+                                                        You have declined the ticket transfer. If this was intentional,
+                                                        no further action is needed.
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 16px; padding: 15px 0; color: #555;">
+                                                        However, if you declined the transfer by mistake or changed your
+                                                        mind, you may need to contact the sender or seller to request a
+                                                        new transfer.
+                                                        Please note that the availability of a re-transfer depends on
+                                                        the sender’s decision.
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 20px 0;">
+                                                        <a href="https://help.ticketmaster.com"
+                                                            style="background-color:#024DDF; color:#ffffff; text-decoration:none; padding:10px 20px; border-radius:5px;">Contact
+                                                            Support</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#024DDF"
+                                            style="padding: 30px 20px; text-align: center; color: #fff;">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="font-size: 14px;">
+                                                        Ticketmaster, Attn: Fan Support, <br>
+                                                        707 Virginia Street East, Suite 170, Charleston, WV 25301 <br>
+                                                        &copy; 2025 Ticketmaster. All rights reserved.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </body>
+
 </html>

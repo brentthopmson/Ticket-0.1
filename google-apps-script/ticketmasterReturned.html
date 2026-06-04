@@ -1,29 +1,86 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: 'Open Sans', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 4px; border: 1px solid #e1e1e1; overflow: hidden; }
-        .header { background-color: #026CDF; padding: 25px 20px; }
-        .header img { height: 30px; }
-        .body { padding: 40px 30px; color: #1f262d; }
-        .title { font-size: 24px; font-weight: 700; color: #6c757d; margin-bottom: 20px; }
-        .info-box { border: 1px solid #e1e1e1; border-radius: 8px; padding: 20px; background-color: #f8f9fa; }
-        .footer { padding: 20px; font-size: 12px; color: #666; background-color: #f9f9f9; border-top: 1px solid #e1e1e1; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header"><img src="https://g.ticketmaster.com/tm_logo_white.png" alt="Ticketmaster"></div>
-        <div class="body">
-            <h1 class="title">Transfer Retracted</h1>
-            <p>The ticket transfer for <strong><?= templateData.eventName ?></strong> was retracted by the sender.</p>
-            <div class="info-box">
-                <p style="margin:0;">These tickets are no longer available in your account. Please reach out to <strong><?= templateData.senderName ?></strong> if you have questions.</p>
-            </div>
-        </div>
-        <div class="footer"><p>© Ticketmaster 2026. All rights reserved.</p></div>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+    <div>
+      <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF" style="font-family:-apple-system,helvetica neue;font-size:16px;color:#313131;">
+        <tbody>
+          <tr>
+            <td align="center">
+              <table width="480" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                  <tr>
+                    <td width="480" align="center">
+                      <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                        <tbody>
+                          <tr>
+                            <td>
+                              <table width="100%" cellspacing="0" cellpadding="0" bgcolor="#024DDF">
+                                <tbody>
+                                  <tr>
+                                    <td align="center" style="padding:20px;">
+                                      <img src="https://image.email.ticketmaster.com/lib/fe8c137277660c7470/m/1/ticketmaster_logo_white_retina.png" alt="Ticketmaster" width="140" height="auto" border="0">
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td align="center" style="font-size:22px;color:#FFFFFF;padding:10px;">
+                                      Your Ticket Has Been Returned
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <table width="100%" cellspacing="0" cellpadding="0" bgcolor="#f7f8f9">
+                                <tbody>
+                                  <tr>
+                                    <td style="padding:35px 20px;font-size:16px;color:#4B545B;text-align:center;">
+                                      We wanted to inform you that your ticket transfer has been <strong>returned to the original sender/seller</strong>. This means the ticket is no longer in your possession and has been restored to the seller’s account.
+                                      <br><br>
+                                      This may have happened due to:
+                                      <ul style="text-align:left;padding-left:40px;">
+                                        <li>A <strong>disputed transfer</strong> that was not resolved within the 72-hour waiting period.</li>
+                                        <li>The sender/seller <strong>canceling the transfer</strong> before it was completed.</li>
+                                        <li>You or the recipient <strong>declining or failing to accept</strong> the ticket within the required timeframe.</li>
+                                      </ul>
+                                      If you still need this ticket, we recommend reaching out to the <strong>original sender/seller</strong> as soon as possible to discuss any potential next steps.
+                                      <br><br>
+                                      For any further assistance, you can visit our <a href="#" style="color:#024DDF;text-decoration:none;">Help Center</a> or contact <strong>Ticketmaster Fan Support</strong>.
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <table width="100%" cellspacing="0" cellpadding="0" bgcolor="#024DDF">
+                                <tbody>
+                                  <tr>
+                                    <td align="center" style="padding:20px;font-size:14px;color:#FFFFFF;">
+                                      Ticketmaster, Attn: Fan Support<br>
+                                      707 Virginia Street East, Suite 170, Charleston, WV 25301<br>
+                                      © 2025 Ticketmaster. All rights reserved.
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-</body>
+  </body>
 </html>

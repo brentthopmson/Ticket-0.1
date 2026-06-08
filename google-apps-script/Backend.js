@@ -379,9 +379,18 @@ function transferTicket(userSheet, params) {
     userSheet.getRange(lastRow, tokenCol + 1).setValue(userToken);
   }
 
+  // Clear the link cell so the sheet's ARRAYFORMULA can compute the URL from token + platform
+  const linkCol = headers.indexOf("link");
+  if (linkCol !== -1) {
+    userSheet.getRange(lastRow, linkCol + 1).clear();
+  }
+
+  Utilities.sleep(2000);
+  const refreshedValues = userSheet.getRange(lastRow, 1, 1, headers.length).getValues()[0];
+
   const userData = {};
   headers.forEach((header, index) => {
-    userData[header] = rowValues[index];
+    userData[header] = refreshedValues[index];
   });
 
   const platform = params.userPlatform || "viagogo";

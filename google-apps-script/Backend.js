@@ -83,6 +83,7 @@ function getPlatformDisplayName(platform) {
   const platformLower = (platform || "").toLowerCase();
   if (platformLower === "uefa") return "UEFA";
   if (platformLower === "ticketmaster") return "Ticketmaster";
+  if (platformLower === "fifa") return "FIFA";
   return "Viagogo";
 }
 

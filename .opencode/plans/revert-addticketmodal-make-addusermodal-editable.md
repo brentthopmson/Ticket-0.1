@@ -125,3 +125,68 @@ if (formData.hospitalityArea) payload.append('hospitalityArea', formData.hospita
 
 ## Verification
 - Run `npx tsc --noEmit` in all 4 apps
+- Run `clasp push` in `Ticket-0.1/google-apps-script/` to deploy Backend.js + fifaTransfer.html changes
+
+---
+
+## Step 4: Fix FIFA tickets/[id]/page.tsx to match reference design
+
+**File:** `fifa/app/secure/myaccount/tickets/[id]/page.tsx`
+
+### Issues comparing our screenshot vs reference:
+
+| Issue | Reference | Our current |
+|-------|-----------|-------------|
+| Page background | Dark/black | Light gray `#F5F5F5` |
+| QR code size | Small (~100-120px) | Large (w-40 h-40 = 160px) |
+| Cyan bar width | Thin (~3-4px) | Thick (w-2 = 8px) |
+| Entry grid row 1 | ENTRANCE \| HOSPITALITY AREA \| GATE | GATE \| ENTRANCE \| HOSPITALITY AREA |
+| Entry grid row 2 | HOSPITALITY AREA \| SUITE \| ROW | SECTION \| ROW \| SEAT |
+| SEAT position | Centered below grid separately | In grid row 2 |
+| Card padding | Compact, tight | Too much padding |
+| QR card overall height | Short/compact | Tall |
+
+### Changes needed:
+
+#### a. Page background → dark
+```tsx
+// Change from:
+<div className="min-h-screen bg-[#F5F5F5] flex flex-col pt-[env(safe-area-inset-top)]">
+// To:
+<div className="min-h-screen bg-[#1a1a1a] flex flex-col pt-[env(safe-area-inset-top)]">
+```
+
+#### b. QR code smaller + less padding
+```tsx
+// Cyan bars thinner:
+// w-2 → w-1 (4px)
+
+// QR image smaller:
+// w-40 h-40 → w-28 h-28 (112px)
+
+// Less padding on QR card:
+// py-4 px-6 → py-3 px-4
+
+// Remove "Seat X of Y" text below QR (reference doesn't have it)
+// The reference only shows the QR, no seat counter text
+```
+
+#### c. Reorder entry grid
+Reference order:
+- Row 1: ENTRANCE | HOSPITALITY AREA | GATE  
+- Row 2: SUITE | ROW | SEAT (SEAT centered below separately)
+
+Actually looking more carefully at the reference:
+- Row 1: ENTRANCE | HOSPITALITY AREA | GATE
+- Row 2: HOSPITALITY AREA | SUITE | ROW  
+- SEAT: centered below as standalone
+
+Since our data model has: gate, entrance, hospitalityArea, sectionNo, row, seat
+And the reference shows SUITE (which maps to section or ticketFolderId), the grid should be:
+
+Row 1: ENTRANCE | GATE | HOSPITALITY AREA
+Row 2: SUITE (sectionNo) | ROW
+SEAT: centered below
+
+#### d. Match info and FIFA branding — keep as-is (already matches)
+#### e. Dotted divider + TICKET CATEGORY — keep as-is
